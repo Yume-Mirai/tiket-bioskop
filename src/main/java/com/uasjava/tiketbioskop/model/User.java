@@ -1,4 +1,6 @@
 package com.uasjava.tiketbioskop.model;
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,42 +15,38 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "film")
+@Table(name = "users")
 @AllArgsConstructor
 @Data
 @Builder
 @NoArgsConstructor
-public class Film {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 100)
-    private String judul;
+    private String nama;
 
-    @Column(nullable = false, length = 50)
-    private String genre;
+    @Column(nullable = false, length = 12)
+    private String nomor;
 
     @Column(nullable = false)
-    private int durasi; // dalam menit
+    private LocalDate tanggal_lahir;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String sinopsis;
 
-    @Column(nullable = false, columnDefinition = "TEXT" )
-    private String cast;
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
 
-    @Column(nullable = true)
-    private String posterUrl;
-
-    @Column(nullable = true)
-    private String trailerUrl;
+    @Column(nullable = false)
+    private String password;
 
     @Enumerated(EnumType.STRING)
-    private StatusFilm status = StatusFilm.TAYANG;
+    @Column(nullable = false)
+    private Role role = Role.USER;
 
-    public enum StatusFilm {
-        TAYANG, SEGERA_TAYANG
+    public enum Role {
+        USER, ADMIN
     }
 }
 
