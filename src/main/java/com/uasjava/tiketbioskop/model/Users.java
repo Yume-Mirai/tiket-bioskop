@@ -1,5 +1,6 @@
 package com.uasjava.tiketbioskop.model;
 import java.time.LocalDate;
+import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,13 +21,19 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @NoArgsConstructor
-public class User {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(nullable = false, length = 100)
-    private String nama;
+    private String username;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
 
     @Column(nullable = false, length = 12)
     private String nomor;
@@ -34,19 +41,21 @@ public class User {
     @Column(nullable = false)
     private LocalDate tanggal_lahir;
 
+    @Column(name = "status")
+    private Boolean status;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String email;
+    @Column(name = "created_date", columnDefinition = "DATE")
+    private Date createdDate;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "update_date", columnDefinition = "DATE")
+    private LocalDate updateDate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role = Role.USER;
+    // @Enumerated(EnumType.STRING)
+    // @Column(nullable = false)
+    // private Role role = Role.USER;
 
-    public enum Role {
-        USER, ADMIN
-    }
+    // public enum Role {
+    //     USER, ADMIN
+    // }
 }
 

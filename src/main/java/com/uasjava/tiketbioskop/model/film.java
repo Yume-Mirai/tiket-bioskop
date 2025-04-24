@@ -1,4 +1,5 @@
 package com.uasjava.tiketbioskop.model;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -6,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,11 +37,12 @@ public class Film {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String sinopsis;
 
-    @Column(nullable = false, columnDefinition = "TEXT" )
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String cast;
 
-    @Column(nullable = true)
-    private String posterUrl;
+    @Column(nullable = true, columnDefinition = "LONGBLOB", length = 10485760)
+    @Lob
+    private byte[] poster;
 
     @Column(nullable = true)
     private String trailerUrl;
@@ -51,4 +54,3 @@ public class Film {
         TAYANG, SEGERA_TAYANG
     }
 }
-

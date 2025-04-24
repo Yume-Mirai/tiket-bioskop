@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,6 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 @Entity
 @Table(name = "transaksi")
 @AllArgsConstructor
@@ -35,7 +38,7 @@ public class Transaksi {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Users users;
 
     @ManyToOne
     @JoinColumn(name = "jadwal_id", nullable = false)
@@ -54,10 +57,16 @@ public class Transaksi {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "transaksi", cascade = CascadeType.ALL)
+    // @JsonManagedReference
     private List<Tiket> tiketList = new ArrayList<>();
+
+    @Column(name = "kode_pembayaran", unique = true, nullable = false, length = 100)
+    private String kodePembayaran;
+
+    @Column(name = "expired_at")
+    private LocalDateTime expiredAt;
 
     public enum StatusTransaksi {
         PENDING, LUNAS, DIBATALKAN
     }
 }
-
