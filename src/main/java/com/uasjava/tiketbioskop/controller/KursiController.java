@@ -2,6 +2,8 @@ package com.uasjava.tiketbioskop.controller;
 import com.uasjava.tiketbioskop.dto.*;
 import com.uasjava.tiketbioskop.service.*;
 import com.uasjava.tiketbioskop.util.WebResponse;
+
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,7 @@ public class KursiController {
     private final KursiService kursiService;
 
     @PostMapping("/admin/kursi")
+    @Operation(summary = "Menambah jadwal baru")
     public ResponseEntity<WebResponse<KursiDTO>> create(@Valid @RequestBody KursiDTO dto) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil tambah", kursiService.create(dto)));
     }

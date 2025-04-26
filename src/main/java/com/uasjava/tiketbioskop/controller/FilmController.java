@@ -6,6 +6,7 @@ import com.uasjava.tiketbioskop.model.Film.StatusFilm;
 import com.uasjava.tiketbioskop.service.FilmService;
 import com.uasjava.tiketbioskop.util.ImageUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ import java.util.Optional;
 
 @RestController
 // @RequestMapping("/api/film")
-@Tag(name = "Film Controller", description = "Upload Film dengan Gambar")
+// @Tag(name = "Film Controller", description = "Upload Film dengan Gambar")
 public class FilmController {
 
     @Autowired
@@ -33,16 +34,19 @@ public class FilmController {
     private FilmService filmService;
 
     @GetMapping("all/film")
+    @Operation(summary = "Mengambil semua data film")
     public ResponseEntity<List<FilmResponseDTO>> getAllFilms() {
         return ResponseEntity.ok(filmService.getAllFilms());
     }
 
     @GetMapping("/all/film/{id}")
+    @Operation(summary = "Mengambil data film sesuai id")
     public ResponseEntity<FilmResponseDTO> getFilmById(@PathVariable Long id) {
         return ResponseEntity.ok(filmService.getFilmById(id));
     }
 
      @GetMapping("/all/film/{id}/poster")
+     @Operation(summary = "Mengambil poster sesuai id dari data film")
     public ResponseEntity<byte[]> getPoster(@PathVariable Long id) {
         Optional<Film> filmOpt = filmRepository.findById(id);
         if (filmOpt.isEmpty() || filmOpt.get().getPoster() == null) {
@@ -57,6 +61,7 @@ public class FilmController {
     }
 
     @PostMapping(value = "/admin/film",consumes = "multipart/form-data")
+    @Operation(summary = "Membuat film baru")
     public ResponseEntity<?> uploadFilm(
             @RequestParam("judul") String judul,
             @RequestParam("genre") String genre,
@@ -76,6 +81,7 @@ public class FilmController {
     }
 
     @PutMapping(value = "/admin/film/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Mengedit data film sesuai id")
     public ResponseEntity<FilmResponseDTO> updateFilm(
             @PathVariable Long id,
             @RequestParam String judul,
@@ -91,8 +97,17 @@ public class FilmController {
     }
 
     @DeleteMapping("/admin/film/{id}")
+    @Operation(summary = "Menghapus data film sesuai id")
     public ResponseEntity<Void> deleteFilm(@PathVariable Long id) {
         filmService.deleteFilm(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/all/film/genre")
+    @Operation(summary = "Menapilkan filter data film sesuai genre")
+    public ResponseEntity<List<FilmResponseDTO>> getFilmsByGenre(@RequestParam String genre) {
+        List<FilmResponseDTO> films = filmService.getFilmsByGenre(genre);
+        return ResponseEntity.ok(films);
+}
+
 }

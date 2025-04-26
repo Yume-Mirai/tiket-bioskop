@@ -84,4 +84,11 @@ public class FilmService {
         dto.setPoster(ImageUtils.decompressImage(film.getPoster()));
         return dto;
     }
+
+    public List<FilmResponseDTO> getFilmsByGenre(String genre) {
+        List<Film> films = filmRepository.findByGenreIgnoreCase(genre);
+        return films.stream()
+                .map(this::toDto)
+                .toList();
+    }
 }
