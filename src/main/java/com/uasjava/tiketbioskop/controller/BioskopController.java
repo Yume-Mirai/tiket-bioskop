@@ -25,7 +25,7 @@ public class BioskopController {
     }
 
     @GetMapping("/all/bioskop")
-    @Operation(summary = "Menampilkan data bioskop")
+    @Operation(summary = "Menampilkan data bioskop dengan pagination and sort")
     public ResponseEntity<WebResponse<Page<BioskopDTO>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", bioskopService.getAll(pageable)));
     }

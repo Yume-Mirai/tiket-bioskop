@@ -17,7 +17,7 @@ public class LaporanController {
     private final TransaksiPdfService transaksiPdfService;
 
     @GetMapping("/transaksi/pdf")
-    @Operation(summary = "Menampilkan Transaksi dalam pdf")
+    @Operation(summary = "Menampilkan data transaksi dalam bentuk pdf")
     public void downloadLaporanPdf(HttpServletResponse response) throws IOException {
         response.setContentType("application/pdf");
         String headerKey = "Content-Disposition";

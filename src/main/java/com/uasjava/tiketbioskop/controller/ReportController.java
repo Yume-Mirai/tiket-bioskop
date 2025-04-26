@@ -26,7 +26,7 @@ public class ReportController {
     }
     
      @GetMapping("/generate-excel")
-      @Operation(summary = "Menampilkan data user dan admin dengan excel")
+      @Operation(summary = "Menampilkan data user dan admin dalam bentuk excel")
     public ResponseEntity<Object> generateExcel(HttpServletResponse response) {
         response.setHeader("Content-Disposition", "attachment; filename=data_user.xlsx");
         try {
