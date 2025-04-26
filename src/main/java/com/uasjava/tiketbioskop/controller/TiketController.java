@@ -11,32 +11,32 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/tiket")
+// @RequestMapping("/api/tiket")
 @RequiredArgsConstructor
 public class TiketController {
     private final TiketService tiketService;
 
-    @PostMapping
+    @PostMapping("/admin/tiket")
     public ResponseEntity<WebResponse<TiketDTO>> create(@Valid @RequestBody TiketDTO dto) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil tambah", tiketService.create(dto)));
     }
 
-    @GetMapping
+    @GetMapping("/all/tiket")
     public ResponseEntity<WebResponse<Page<TiketDTO>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", tiketService.getAll(pageable)));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/all/tiket/{id}")
     public ResponseEntity<WebResponse<TiketDTO>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", tiketService.getById(id)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/admin/tiket/{id}")
     public ResponseEntity<WebResponse<TiketDTO>> update(@PathVariable Long id, @Valid @RequestBody TiketDTO dto) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil update", tiketService.update(id, dto)));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/tiket/{id}")
     public ResponseEntity<WebResponse<String>> delete(@PathVariable Long id) {
         tiketService.delete(id);
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil hapus", "OK"));

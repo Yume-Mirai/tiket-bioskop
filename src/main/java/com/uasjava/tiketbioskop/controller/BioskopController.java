@@ -11,32 +11,32 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/bioskop")
+// @RequestMapping("/api/bioskop")
 @RequiredArgsConstructor
 public class BioskopController {
     private final BioskopService bioskopService;
 
-    @PostMapping
+    @PostMapping("/admin/bioskop")
     public ResponseEntity<WebResponse<BioskopDTO>> create(@Valid @RequestBody BioskopDTO dto) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil tambah", bioskopService.create(dto)));
     }
 
-    @GetMapping
+    @GetMapping("/all/bioskop")
     public ResponseEntity<WebResponse<Page<BioskopDTO>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", bioskopService.getAll(pageable)));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/all/bioskop/{id}")
     public ResponseEntity<WebResponse<BioskopDTO>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", bioskopService.getById(id)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/admin/bioskop/{id}")
     public ResponseEntity<WebResponse<BioskopDTO>> update(@PathVariable Long id, @Valid @RequestBody BioskopDTO dto) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil update", bioskopService.update(id, dto)));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/bioskop/{id}")
     public ResponseEntity<WebResponse<String>> delete(@PathVariable Long id) {
         bioskopService.delete(id);
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil hapus", "OK"));

@@ -14,7 +14,7 @@ import com.uasjava.tiketbioskop.dto.GenericResponse;
 import com.uasjava.tiketbioskop.service.EmailService;
 
 @RestController
-@RequestMapping("/email")
+@RequestMapping("/admin/email")
 public class EmailController {
 
     @Autowired

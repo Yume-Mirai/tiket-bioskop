@@ -14,7 +14,7 @@ import com.uasjava.tiketbioskop.service.TransaksiService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/transaksi")
+@RequestMapping("/user/api/transaksi")
 @RequiredArgsConstructor
 public class TransaksiController {
 

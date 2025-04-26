@@ -13,7 +13,7 @@ public class FilmSpecification {
         return (root, query, cb) -> status == null ? null : cb.equal(root.get("status"), status);
     }
 
-    public static Specification<Film> hasJudulContaining(String keyword) {
+    public static Specification<Film> hasJudul(String keyword) {
         return (root, query, cb) -> keyword == null ? null : cb.like(cb.lower(root.get("judul")), "%" + keyword.toLowerCase() + "%");
     }
 }

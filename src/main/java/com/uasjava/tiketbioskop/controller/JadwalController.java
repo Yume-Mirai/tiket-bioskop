@@ -11,32 +11,32 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/jadwal")
+// @RequestMapping("/api/jadwal")
 @RequiredArgsConstructor
 public class JadwalController {
     private final JadwalService jadwalService;
 
-    @PostMapping
+    @PostMapping("/admin/jadwal")
     public ResponseEntity<WebResponse<JadwalDTO>> create(@Valid @RequestBody JadwalDTO dto) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil tambah", jadwalService.create(dto)));
     }
 
-    @GetMapping
+    @GetMapping("/all/jadwal")
     public ResponseEntity<WebResponse<Page<JadwalDTO>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", jadwalService.getAll(pageable)));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/all/jadwal/{id}")
     public ResponseEntity<WebResponse<JadwalDTO>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", jadwalService.getById(id)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/admin/jadwal/{id}")
     public ResponseEntity<WebResponse<JadwalDTO>> update(@PathVariable Long id, @Valid @RequestBody JadwalDTO dto) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil update", jadwalService.update(id, dto)));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/jadwal/{id}")
     public ResponseEntity<WebResponse<String>> delete(@PathVariable Long id) {
         jadwalService.delete(id);
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil hapus", "OK"));

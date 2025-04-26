@@ -14,7 +14,7 @@ import com.uasjava.tiketbioskop.service.ReportService;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping("/report")
+@RequestMapping("/admin/report")
 public class ReportController {
 
     @Autowired

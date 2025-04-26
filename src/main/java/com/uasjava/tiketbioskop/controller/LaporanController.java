@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/api/laporan")
+@RequestMapping("admin/api/laporan")
 @RequiredArgsConstructor
 public class LaporanController {
 

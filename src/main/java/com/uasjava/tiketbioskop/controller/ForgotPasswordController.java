@@ -11,7 +11,7 @@ import com.uasjava.tiketbioskop.service.ForgotPasswordService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/forgot-password")
+@RequestMapping("/user/forgot-password")
 @RequiredArgsConstructor
 public class ForgotPasswordController {
 

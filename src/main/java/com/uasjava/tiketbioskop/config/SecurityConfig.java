@@ -28,12 +28,14 @@ public class SecurityConfig {
                             auth.requestMatchers("/login","/users/register",
                                             "/email/send",
                                             "/report/**",
-                                            // "/users/register",
+                                            "/users/register",
                                             "/api-docs/**",
                                             "/swagger-ui/**",
                                             "/swagger-ui.html")
                             .permitAll()
-                            // .requestMatchers("/admin/**").hasAuthority("Admin")
+                            .requestMatchers("/admin/**").hasAuthority("admin")
+                            .requestMatchers("/user/**").hasAuthority("user")
+                            .requestMatchers("/view/**").hasAnyAuthority("user", "admin")
                             .anyRequest()
                             .authenticated())
 
