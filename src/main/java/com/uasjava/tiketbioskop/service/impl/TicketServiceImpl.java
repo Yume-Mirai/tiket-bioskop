@@ -1,17 +1,11 @@
 package com.uasjava.tiketbioskop.service.impl;
 
 import java.util.NoSuchElementException;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import com.uasjava.tiketbioskop.dto.JadwalDTO;
 import com.uasjava.tiketbioskop.dto.TiketDTO;
-import com.uasjava.tiketbioskop.model.Bioskop;
-import com.uasjava.tiketbioskop.model.Film;
-import com.uasjava.tiketbioskop.model.Jadwal;
 import com.uasjava.tiketbioskop.model.Kursi;
 import com.uasjava.tiketbioskop.model.Tiket;
 import com.uasjava.tiketbioskop.model.Transaksi;
@@ -19,8 +13,6 @@ import com.uasjava.tiketbioskop.repository.KursiRepository;
 import com.uasjava.tiketbioskop.repository.TiketRepository;
 import com.uasjava.tiketbioskop.repository.TransaksiRepository;
 import com.uasjava.tiketbioskop.service.TiketService;
-
-import ch.qos.logback.core.model.Model;
 import lombok.RequiredArgsConstructor;
 
 @Service

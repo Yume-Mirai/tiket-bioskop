@@ -104,7 +104,7 @@ public class FilmController {
     }
 
     @GetMapping("/all/film/genre")
-    @Operation(summary = "Menapilkan filter data film sesuai genre")
+    @Operation(summary = "Menampilkan filter data film sesuai genre")
     public ResponseEntity<List<FilmResponseDTO>> getFilmsByGenre(@RequestParam String genre) {
         List<FilmResponseDTO> films = filmService.getFilmsByGenre(genre);
         return ResponseEntity.ok(films);

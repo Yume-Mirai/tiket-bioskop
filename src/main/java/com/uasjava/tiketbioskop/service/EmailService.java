@@ -1,9 +1,5 @@
 package com.uasjava.tiketbioskop.service;
-
-import java.util.Map;
-
 import org.thymeleaf.context.Context;
-
 import jakarta.mail.MessagingException;
 
 public interface EmailService {

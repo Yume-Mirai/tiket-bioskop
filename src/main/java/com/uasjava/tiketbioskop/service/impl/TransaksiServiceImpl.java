@@ -4,16 +4,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
-
 import com.uasjava.tiketbioskop.dto.CheckoutRequestDTO;
 import com.uasjava.tiketbioskop.dto.CheckoutResponseDTO;
-import com.uasjava.tiketbioskop.dto.UserCredentialsDto;
 import com.uasjava.tiketbioskop.model.Jadwal;
 import com.uasjava.tiketbioskop.model.Kursi;
 import com.uasjava.tiketbioskop.model.Tiket;
@@ -24,7 +19,6 @@ import com.uasjava.tiketbioskop.repository.JadwalRepository;
 import com.uasjava.tiketbioskop.repository.KursiRepository;
 import com.uasjava.tiketbioskop.repository.TiketRepository;
 import com.uasjava.tiketbioskop.repository.TransaksiRepository;
-import com.uasjava.tiketbioskop.repository.UserRepository;
 import com.uasjava.tiketbioskop.service.EmailService;
 import com.uasjava.tiketbioskop.service.TransaksiService;
 import com.uasjava.tiketbioskop.service.helper.AuthHelperService;

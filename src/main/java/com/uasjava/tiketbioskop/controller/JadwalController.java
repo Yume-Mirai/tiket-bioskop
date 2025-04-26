@@ -31,7 +31,7 @@ public class JadwalController {
     }
 
     @GetMapping("/all/jadwal/{id}")
-    @Operation(summary = "Menapilkan data jadwal sesuai id")
+    @Operation(summary = "Menampilkan data jadwal sesuai id")
     public ResponseEntity<WebResponse<JadwalDTO>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", jadwalService.getById(id)));
     }

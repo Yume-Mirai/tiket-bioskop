@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.uasjava.tiketbioskop.dto.GenericResponse;
 import com.uasjava.tiketbioskop.service.ReportService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
@@ -25,6 +26,7 @@ public class ReportController {
     }
     
      @GetMapping("/generate-excel")
+      @Operation(summary = "Menampilkan data user dan admin dengan excel")
     public ResponseEntity<Object> generateExcel(HttpServletResponse response) {
         response.setHeader("Content-Disposition", "attachment; filename=data_user.xlsx");
         try {

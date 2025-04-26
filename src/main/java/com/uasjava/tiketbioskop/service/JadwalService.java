@@ -1,7 +1,6 @@
 package com.uasjava.tiketbioskop.service;
 
 import com.uasjava.tiketbioskop.dto.*;
-import com.uasjava.tiketbioskop.util.WebResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

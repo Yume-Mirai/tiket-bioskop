@@ -1,6 +1,8 @@
 package com.uasjava.tiketbioskop.controller;
 
 import com.uasjava.tiketbioskop.service.TransaksiPdfService;
+
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ public class LaporanController {
     private final TransaksiPdfService transaksiPdfService;
 
     @GetMapping("/transaksi/pdf")
+    @Operation(summary = "Menampilkan Transaksi dalam pdf")
     public void downloadLaporanPdf(HttpServletResponse response) throws IOException {
         response.setContentType("application/pdf");
         String headerKey = "Content-Disposition";

@@ -25,13 +25,13 @@ public class BioskopController {
     }
 
     @GetMapping("/all/bioskop")
-    @Operation(summary = "menampilkan data bioskop")
+    @Operation(summary = "Menampilkan data bioskop")
     public ResponseEntity<WebResponse<Page<BioskopDTO>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", bioskopService.getAll(pageable)));
     }
 
     @GetMapping("/all/bioskop/{id}")
-    @Operation(summary = "menampilkan data bioskop sesuai id")
+    @Operation(summary = "Menampilkan data bioskop sesuai id")
     public ResponseEntity<WebResponse<BioskopDTO>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", bioskopService.getById(id)));
     }

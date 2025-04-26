@@ -31,99 +31,10 @@ public class ReportServiceImpl implements ReportService {
         this.usersRepository = usersRepository;
     }
 
-    // @Override
-    // public Object generateExcel() throws IOException {
-    // Workbook workbook = new XSSFWorkbook();
-
-    // Sheet sheet = workbook.createSheet("DATA USER");
-
-    // CellStyle headerStyle = workbook.createCellStyle();
-    // headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
-    // headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-    // XSSFFont headerFont = ((XSSFWorkbook) workbook).createFont();
-    // headerFont.setFontName("Arial");
-    // headerFont.setFontHeightInPoints((short) 12);
-    // headerFont.setBold(true);
-    // headerFont.setColor(IndexedColors.WHITE.getIndex());
-
-    // headerStyle.setFont(headerFont);
-
-    // Row headerRow = sheet.createRow(0);
-
-    // Cell idCell = headerRow.createCell(0);
-    // idCell.setCellValue("ID");
-    // idCell.setCellStyle(headerStyle);
-
-    // Cell usernameCell = headerRow.createCell(1);
-    // usernameCell.setCellValue("USERNAME");
-    // usernameCell.setCellStyle(headerStyle);
-
-    // Cell passwordCell = headerRow.createCell(2);
-    // passwordCell.setCellValue("PASSWORD");
-    // passwordCell.setCellStyle(headerStyle);
-
-    // Cell emailCell = headerRow.createCell(3);
-    // emailCell.setCellValue("EMAIL");
-    // emailCell.setCellStyle(headerStyle);
-
-    // Cell nomorCell = headerRow.createCell(4);
-    // nomorCell.setCellValue("NOMOR");
-    // nomorCell.setCellStyle(headerStyle);
-
-    // Cell bornCell = headerRow.createCell(5);
-    // bornCell.setCellValue("TANGGAL LAHIR");
-    // bornCell.setCellStyle(headerStyle);
-
-    // Cell statusCell = headerRow.createCell(6);
-    // statusCell.setCellValue("Status");
-    // statusCell.setCellStyle(headerStyle);
-
-    // List<Users> usersList = usersRepository.findAll();
-
-    // int currentIndexRow = 1; // guna untuk membuat baris pada excel
-    // for(Users user : usersList) {
-    // Row bodyRow = sheet.createRow(currentIndexRow);
-
-    // Cell cell = bodyRow.createCell(0);
-    // cell.setCellValue(user.getId());
-
-    // cell = bodyRow.createCell(1);
-    // cell.setCellValue(user.getUsername());
-
-    // cell = bodyRow.createCell(2);
-    // cell.setCellValue(user.getPassword());
-
-    // cell = bodyRow.createCell(3);
-    // cell.setCellValue(user.getEmail());
-
-    // cell = bodyRow.createCell(4);
-    // cell.setCellValue(user.getNomor());
-
-    // cell = bodyRow.createCell(5);
-    // cell.setCellValue(user.getTanggal_lahir());
-
-    // cell = bodyRow.createCell(6);
-    // cell.setCellValue(user.getStatus());
-
-    // currentIndexRow++;
-    // }
-
-    // ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    // try{
-    // workbook.write(outputStream);
-    // outputStream.toByteArray();
-    // }finally{
-    // workbook.close();
-    // }
-
-    // return outputStream.toByteArray();
-    // }
-
     @Override
     public Object generateExcel() throws IOException {
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("DATA USER");
+        Sheet sheet = workbook.createSheet("DATA USER & ADMIN");
 
         // ===== Header Style =====
         CellStyle headerStyle = workbook.createCellStyle();
