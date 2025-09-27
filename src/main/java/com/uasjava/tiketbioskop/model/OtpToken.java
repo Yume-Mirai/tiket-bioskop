@@ -24,5 +24,6 @@ public class OtpToken {
     private String email;
     private String otp;
     private LocalDateTime expirationTime;
+    @Builder.Default
     private Boolean isVerified = false;
 }

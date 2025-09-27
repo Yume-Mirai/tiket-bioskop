@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.data.domain.Page;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +35,13 @@ public class FilmController {
     private FilmService filmService;
 
     @GetMapping("all/film")
-    @Operation(summary = "Mengambil semua data film")
-    public ResponseEntity<List<FilmResponseDTO>> getAllFilms() {
-        return ResponseEntity.ok(filmService.getAllFilms());
+    @Operation(summary = "Mengambil semua data film dengan pagination dan sorting")
+    public ResponseEntity<Page<FilmResponseDTO>> getAllFilms(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        return ResponseEntity.ok(filmService.getAllFilms(page, size, sortBy, sortDir));
     }
 
     @GetMapping("/all/film/{id}")
@@ -91,7 +96,7 @@ public class FilmController {
             @RequestParam String cast,
             @RequestParam(required = false) String trailerUrl,
             @RequestParam StatusFilm status,
-            @RequestPart(required = false) MultipartFile poster
+            @RequestParam(required = false) MultipartFile poster
     ) throws IOException {
         return ResponseEntity.ok(filmService.updateFilm(id, judul, genre, durasi, sinopsis, cast, trailerUrl, status, poster));
     }
@@ -104,10 +109,51 @@ public class FilmController {
     }
 
     @GetMapping("/all/film/genre")
-    @Operation(summary = "Menampilkan filter data film sesuai genre")
-    public ResponseEntity<List<FilmResponseDTO>> getFilmsByGenre(@RequestParam String genre) {
-        List<FilmResponseDTO> films = filmService.getFilmsByGenre(genre);
-        return ResponseEntity.ok(films);
-}
+    @Operation(summary = "Menampilkan filter data film sesuai genre dengan pagination dan sorting")
+    public ResponseEntity<Page<FilmResponseDTO>> getFilmsByGenre(
+            @RequestParam String genre,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        return ResponseEntity.ok(filmService.getFilmsByGenre(genre, page, size, sortBy, sortDir));
+    }
+
+    @GetMapping("/all/film/search")
+    @Operation(summary = "Mencari film berdasarkan judul dengan pagination dan sorting")
+    public ResponseEntity<Page<FilmResponseDTO>> searchFilmsByTitle(
+            @RequestParam String title,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        return ResponseEntity.ok(filmService.searchFilmsByTitle(title, page, size, sortBy, sortDir));
+    }
+
+    @GetMapping("/all/film/filter")
+    @Operation(summary = "Filter film berdasarkan status dengan pagination dan sorting")
+    public ResponseEntity<Page<FilmResponseDTO>> filterFilmsByStatus(
+            @RequestParam Film.StatusFilm status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "judul") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        return ResponseEntity.ok(filmService.filterFilmsByStatus(status, page, size, sortBy, sortDir));
+    }
+
+    @GetMapping("/all/film/advanced-search")
+    @Operation(summary = "Advanced search film dengan multiple criteria")
+    public ResponseEntity<Page<FilmResponseDTO>> advancedSearchFilms(
+            @RequestParam(required = false) String judul,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) Film.StatusFilm status,
+            @RequestParam(required = false) Integer minDurasi,
+            @RequestParam(required = false) Integer maxDurasi,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "judul") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        return ResponseEntity.ok(filmService.advancedSearchFilms(judul, genre, status, minDurasi, maxDurasi, page, size, sortBy, sortDir));
+    }
 
 }

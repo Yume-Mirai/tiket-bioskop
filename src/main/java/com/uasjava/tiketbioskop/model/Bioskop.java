@@ -34,6 +34,7 @@ public class Bioskop {
     private String lokasi;
 
     @OneToMany(mappedBy = "bioskop", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Jadwal> jadwalList = new ArrayList<>();
 
 }

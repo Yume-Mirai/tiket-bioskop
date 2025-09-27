@@ -48,6 +48,7 @@ public class Transaksi {
     private int totalHarga;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private StatusTransaksi status = StatusTransaksi.PENDING;
 
     @Column(nullable = false, length = 50)
@@ -58,6 +59,7 @@ public class Transaksi {
 
     @OneToMany(mappedBy = "transaksi", cascade = CascadeType.ALL)
     // @JsonManagedReference
+    @Builder.Default
     private List<Tiket> tiketList = new ArrayList<>();
 
     @Column(name = "kode_pembayaran", unique = true, nullable = false, length = 100)

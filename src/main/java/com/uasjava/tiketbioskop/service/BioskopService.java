@@ -9,4 +9,6 @@ public interface BioskopService {
     void delete(Long id);
     BioskopDTO getById(Long id);
     Page<BioskopDTO> getAll(Pageable pageable);
+    Page<BioskopDTO> searchBioskop(String nama, int page, int size, String sortBy, String sortDir);
+    Page<BioskopDTO> filterBioskopByLocation(String lokasi, int page, int size, String sortBy, String sortDir);
 }

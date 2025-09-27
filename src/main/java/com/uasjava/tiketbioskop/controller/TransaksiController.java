@@ -1,15 +1,16 @@
 package com.uasjava.tiketbioskop.controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.uasjava.tiketbioskop.dto.CheckoutRequestDTO;
 import com.uasjava.tiketbioskop.dto.CheckoutResponseDTO;
 import com.uasjava.tiketbioskop.dto.KonfirmasiPembayaranDTO;
+import com.uasjava.tiketbioskop.dto.TransaksiDTO;
 import com.uasjava.tiketbioskop.service.TransaksiService;
+
+import io.swagger.v3.oas.annotations.Operation;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,5 +32,37 @@ public class TransaksiController {
         return sukses ?
             ResponseEntity.ok("Pembayaran berhasil") :
             ResponseEntity.badRequest().body("Pembayaran gagal atau sudah kadaluarsa");
+    }
+
+    @GetMapping("/my-transactions")
+    @Operation(summary = "Menampilkan transaksi user dengan pagination dan sorting")
+    public ResponseEntity<Page<TransaksiDTO>> getMyTransactions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        return ResponseEntity.ok(transaksiService.getMyTransactions(page, size, sortBy, sortDir));
+    }
+
+    @GetMapping("/filter")
+    @Operation(summary = "Filter transaksi user berdasarkan status dengan pagination")
+    public ResponseEntity<Page<TransaksiDTO>> filterMyTransactionsByStatus(
+            @RequestParam String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        return ResponseEntity.ok(transaksiService.filterMyTransactionsByStatus(status, page, size, sortBy, sortDir));
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search transaksi user berdasarkan kode pembayaran dengan pagination")
+    public ResponseEntity<Page<TransaksiDTO>> searchMyTransactions(
+            @RequestParam String kodePembayaran,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        return ResponseEntity.ok(transaksiService.searchMyTransactions(kodePembayaran, page, size, sortBy, sortDir));
     }
 }

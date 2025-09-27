@@ -1,5 +1,7 @@
 package com.uasjava.tiketbioskop.dto;
 
+import java.time.LocalDate;
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UserDetailDto {
+    private int id;
     private String username;
+    private String email;
+    private String nomor;
+    private LocalDate tanggal_lahir;
+    private Boolean status;
+    private Date createdDate;
+    private LocalDate updateDate;
     private String role;
-    private String accessToken;
 }

@@ -2,9 +2,7 @@ package com.uasjava.tiketbioskop.dto;
 
 
 import java.time.LocalDate;
-import java.util.List;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +19,4 @@ public class RegisterUserDto {
     private String email;
     private String nomor;
     private LocalDate tanggal_lahir;
-    private List<RoleDto> roles;
 }

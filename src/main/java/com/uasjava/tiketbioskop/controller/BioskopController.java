@@ -30,6 +30,30 @@ public class BioskopController {
         return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", bioskopService.getAll(pageable)));
     }
 
+    @GetMapping("/all/bioskop/search")
+    @Operation(summary = "Mencari bioskop berdasarkan nama dengan pagination dan sorting")
+    public ResponseEntity<WebResponse<Page<BioskopDTO>>> searchBioskop(
+            @RequestParam String nama,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nama") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        return ResponseEntity.ok(new WebResponse<>(200, "Berhasil cari data",
+            bioskopService.searchBioskop(nama, page, size, sortBy, sortDir)));
+    }
+
+    @GetMapping("/all/bioskop/filter")
+    @Operation(summary = "Filter bioskop berdasarkan lokasi dengan pagination dan sorting")
+    public ResponseEntity<WebResponse<Page<BioskopDTO>>> filterBioskopByLocation(
+            @RequestParam String lokasi,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nama") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        return ResponseEntity.ok(new WebResponse<>(200, "Berhasil filter data",
+            bioskopService.filterBioskopByLocation(lokasi, page, size, sortBy, sortDir)));
+    }
+
     @GetMapping("/all/bioskop/{id}")
     @Operation(summary = "Menampilkan data bioskop sesuai id")
     public ResponseEntity<WebResponse<BioskopDTO>> getById(@PathVariable Long id) {

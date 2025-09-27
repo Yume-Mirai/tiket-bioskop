@@ -48,6 +48,7 @@ public class Film {
     private String trailerUrl;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private StatusFilm status = StatusFilm.TAYANG;
 
     public enum StatusFilm {

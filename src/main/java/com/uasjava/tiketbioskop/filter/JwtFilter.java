@@ -22,18 +22,15 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    @Autowired
     private final JwtProvider jwtProvider;
-    
-    public JwtFilter(JwtProvider jwtProvider) {
-        this.jwtProvider = jwtProvider;
-    }
     
     @Override
     protected void doFilterInternal(HttpServletRequest request , 
@@ -56,21 +53,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
 
                 UserCredentialsDto credentialPayload = new UserCredentialsDto();
-                credentialPayload.setUserId(Integer.valueOf(claims.getId()));
-                credentialPayload.setUsername(claims.get("username").toString());
+                credentialPayload.setUserId(Integer.parseInt(claims.getId()));
+                credentialPayload.setUsername(username);
 
 
                 Authentication authentication  = new UsernamePasswordAuthenticationToken(
                     username,
-                    credentialPayload, 
-                    roles.stream().map(aLong -> new SimpleGrantedAuthority(String.valueOf(aLong)))
+                    credentialPayload,
+                    roles.stream().map(role -> new SimpleGrantedAuthority(role))
                                     .toList());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error("JWT Filter error: {}", e.getMessage(), e);
         }
 
         filterChain.doFilter(request, response);

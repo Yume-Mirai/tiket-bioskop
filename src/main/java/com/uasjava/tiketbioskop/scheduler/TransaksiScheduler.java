@@ -30,7 +30,7 @@ public class TransaksiScheduler {
         transaksiRepository.saveAll(list);
 
         if (!list.isEmpty()) {
-            System.out.println("Expired " + list.size() + " transaksi.");
-        }
+             System.out.println("Expired " + list.size() + " transaksi.");
+         }
     }
 }

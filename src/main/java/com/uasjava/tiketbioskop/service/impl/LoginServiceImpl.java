@@ -20,40 +20,25 @@ import com.uasjava.tiketbioskop.service.EmailService;
 import com.uasjava.tiketbioskop.service.LoginService;
 import com.uasjava.tiketbioskop.util.PasswordUtil;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
 
-    @Autowired
     private final UserRepository usersRepository;
-    @Autowired
     private final UserRoleRepository userRoleRepository;
-    @Autowired
     private final JwtProvider jwtProvider;
-    @Autowired
-    private EmailService emailService;
-
-    public LoginServiceImpl(UserRepository usersRepository, UserRoleRepository userRoleRepository,
-            JwtProvider jwtProvider, EmailService emailService) {
-        this.emailService = emailService;
-        this.usersRepository = usersRepository;
-        this.userRoleRepository = userRoleRepository;
-        this.jwtProvider = jwtProvider;
-    }
+    private final EmailService emailService;
 
     @Override
     public UserDetailDto login(LoginDto dto) {
-        // System.out.println(dto);
         Optional<Users> optionalUsers = usersRepository.findByUsername(dto.getUsername());
 
         if (optionalUsers.isPresent()) {
             Users users = optionalUsers.get();
-
-            // ini untuk mengecek hashing password nya atau munculin hashing passwordnya di
-            // terminalnya
-            log.info(PasswordUtil.hash(dto.getPassword()));
 
             if (PasswordUtil.check(dto.getPassword(), users.getPassword())) {
 
@@ -74,9 +59,15 @@ public class LoginServiceImpl implements LoginService {
                 emailService.sendEmail(users.getEmail(), subject, body);
 
                 return UserDetailDto.builder()
+                        .id(users.getId())
                         .username(users.getUsername())
+                        .email(users.getEmail())
+                        .nomor(users.getNomor())
+                        .tanggal_lahir(users.getTanggal_lahir())
+                        .status(users.getStatus())
+                        .createdDate(users.getCreatedDate())
+                        .updateDate(users.getUpdateDate())
                         .role(String.join(",", roles))
-                        .accessToken(accessToken)
                         .build();
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username atau Password Salah");

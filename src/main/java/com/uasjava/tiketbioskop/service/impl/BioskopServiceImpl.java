@@ -47,4 +47,28 @@ public class BioskopServiceImpl implements BioskopService {
     public Page<BioskopDTO> getAll(Pageable pageable) {
         return bioskopRepository.findAll(pageable).map(b -> modelMapper.map(b, BioskopDTO.class));
     }
+
+    @Override
+    public Page<BioskopDTO> searchBioskop(String nama, int page, int size, String sortBy, String sortDir) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, size,
+            sortDir.equalsIgnoreCase("desc") ?
+                org.springframework.data.domain.Sort.by(sortBy).descending() :
+                org.springframework.data.domain.Sort.by(sortBy).ascending()
+        );
+        return bioskopRepository.findByNamaContainingIgnoreCase(nama, pageable)
+            .map(b -> modelMapper.map(b, BioskopDTO.class));
+    }
+
+    @Override
+    public Page<BioskopDTO> filterBioskopByLocation(String lokasi, int page, int size, String sortBy, String sortDir) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, size,
+            sortDir.equalsIgnoreCase("desc") ?
+                org.springframework.data.domain.Sort.by(sortBy).descending() :
+                org.springframework.data.domain.Sort.by(sortBy).ascending()
+        );
+        return bioskopRepository.findByLokasiContainingIgnoreCase(lokasi, pageable)
+            .map(b -> modelMapper.map(b, BioskopDTO.class));
+    }
 }

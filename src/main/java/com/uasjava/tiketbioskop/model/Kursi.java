@@ -33,6 +33,7 @@ public class Kursi {
     private String nomor;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private TipeKursi tipe = TipeKursi.REGULER;
 
     public enum TipeKursi {
