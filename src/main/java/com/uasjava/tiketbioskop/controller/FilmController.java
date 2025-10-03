@@ -1,6 +1,7 @@
 package com.uasjava.tiketbioskop.controller;
 
 import com.uasjava.tiketbioskop.dto.FilmResponseDTO;
+import com.uasjava.tiketbioskop.dto.GenericResponse;
 import com.uasjava.tiketbioskop.model.Film;
 import com.uasjava.tiketbioskop.model.Film.StatusFilm;
 import com.uasjava.tiketbioskop.service.FilmService;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.data.domain.Page;
+
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -65,9 +68,9 @@ public class FilmController {
         return new ResponseEntity<>(image, headers, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/admin/film",consumes = "multipart/form-data")
+    @PostMapping(value = "/admin/film", consumes = "multipart/form-data")
     @Operation(summary = "Membuat film baru")
-    public ResponseEntity<?> uploadFilm(
+    public ResponseEntity<GenericResponse<Film>> uploadFilm(
             @RequestParam("judul") String judul,
             @RequestParam("genre") String genre,
             @RequestParam("durasi") int durasi,
@@ -82,7 +85,14 @@ public class FilmController {
                 judul, genre, durasi, sinopsis, cast, poster, trailerUrl, status
         );
 
-        return ResponseEntity.ok(savedFilm);
+        GenericResponse<Film> response = GenericResponse.<Film>builder()
+                .success(true)
+                .message("Film berhasil dibuat")
+                .data(savedFilm)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping(value = "/admin/film/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

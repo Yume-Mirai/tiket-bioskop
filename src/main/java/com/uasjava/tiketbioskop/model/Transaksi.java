@@ -7,6 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -44,6 +45,11 @@ public class Transaksi {
     @JoinColumn(name = "jadwal_id", nullable = false)
     private Jadwal jadwal;
 
+    @OneToMany(mappedBy = "transaksi", cascade = CascadeType.ALL)
+    @JsonIgnore
+    @Builder.Default
+    private List<Tiket> tiketList = new ArrayList<>();
+
     @Column(nullable = false)
     private int totalHarga;
 
@@ -56,11 +62,6 @@ public class Transaksi {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "transaksi", cascade = CascadeType.ALL)
-    // @JsonManagedReference
-    @Builder.Default
-    private List<Tiket> tiketList = new ArrayList<>();
 
     @Column(name = "kode_pembayaran", unique = true, nullable = false, length = 100)
     private String kodePembayaran;

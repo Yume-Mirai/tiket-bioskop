@@ -25,4 +25,7 @@ public interface TransaksiRepository extends JpaRepository<Transaksi, Long> {
     Page<Transaksi> findByUsers(Users users, Pageable pageable);
     Page<Transaksi> findByUsersAndStatus(Users users, StatusTransaksi status, Pageable pageable);
     Page<Transaksi> findByUsersAndKodePembayaranContainingIgnoreCase(Users users, String kodePembayaran, Pageable pageable);
+
+    // Untuk generate unique kode pembayaran
+    boolean existsByKodePembayaran(String kodePembayaran);
 }

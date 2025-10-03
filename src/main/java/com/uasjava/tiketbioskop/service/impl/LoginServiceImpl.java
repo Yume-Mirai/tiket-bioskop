@@ -65,8 +65,8 @@ public class LoginServiceImpl implements LoginService {
                         .nomor(users.getNomor())
                         .tanggal_lahir(users.getTanggal_lahir())
                         .status(users.getStatus())
-                        .createdDate(users.getCreatedDate())
-                        .updateDate(users.getUpdateDate())
+                        .createdAt(users.getCreatedAt())
+                        .updatedAt(users.getUpdatedAt())
                         .role(String.join(",", roles))
                         .build();
             } else {

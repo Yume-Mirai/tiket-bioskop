@@ -62,7 +62,7 @@ public class ReportServiceImpl implements ReportService {
 
         // ===== Header Row =====
         Row headerRow = sheet.createRow(0);
-        String[] columns = { "ID", "USERNAME", "PASSWORD", "EMAIL", "NOMOR", "TANGGAL LAHIR", "STATUS" };
+        String[] columns = { "ID", "USERNAME", "EMAIL", "NOMOR", "TANGGAL LAHIR", "STATUS", "TERDAFTAR", "TERAKHIR LOGIN" };
 
         for (int i = 0; i < columns.length; i++) {
             Cell cell = headerRow.createCell(i);
@@ -77,39 +77,55 @@ public class ReportServiceImpl implements ReportService {
         for (Users user : usersList) {
             Row row = sheet.createRow(currentIndexRow++);
 
+            // ID
             Cell cell0 = row.createCell(0);
             cell0.setCellValue(user.getId());
             cell0.setCellStyle(bodyStyle);
 
+            // Username
             Cell cell1 = row.createCell(1);
             cell1.setCellValue(user.getUsername());
             cell1.setCellStyle(bodyStyle);
 
+            // Email
             Cell cell2 = row.createCell(2);
-            cell2.setCellValue(user.getPassword()); // atau sembunyikan password
+            cell2.setCellValue(user.getEmail());
             cell2.setCellStyle(bodyStyle);
 
+            // Nomor Telepon
             Cell cell3 = row.createCell(3);
-            cell3.setCellValue(user.getEmail());
+            cell3.setCellValue(user.getNomor());
             cell3.setCellStyle(bodyStyle);
 
+            // Tanggal Lahir
             Cell cell4 = row.createCell(4);
-            cell4.setCellValue(user.getNomor());
-            cell4.setCellStyle(bodyStyle);
-
-            Cell cell5 = row.createCell(5);
             if (user.getTanggal_lahir() != null) {
-                cell5.setCellValue(user.getTanggal_lahir()); // Harus berupa java.util.Date
-                cell5.setCellStyle(dateStyle);
+                cell4.setCellValue(user.getTanggal_lahir().toString());
+                cell4.setCellStyle(bodyStyle);
             }
 
+            // Status
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(user.getStatus() ? "Aktif" : "Tidak Aktif");
+            cell5.setCellStyle(bodyStyle);
+
+            // Tanggal Dibuat
             Cell cell6 = row.createCell(6);
-            cell6.setCellValue(user.getStatus());
-            cell6.setCellStyle(bodyStyle);
+            if (user.getCreatedAt() != null) {
+                cell6.setCellValue(user.getCreatedAt().toString());
+                cell6.setCellStyle(bodyStyle);
+            }
+
+            // Terakhir Login
+            Cell cell7 = row.createCell(7);
+            if (user.getLastLogin() != null) {
+                cell7.setCellValue(user.getLastLogin().toString());
+                cell7.setCellStyle(bodyStyle);
+            }
         }
 
         // ===== Auto-size columns =====
-        for (int i = 0; i < columns.length; i++) {
+        for (int i = 0; i < 8; i++) {
             sheet.autoSizeColumn(i);
         }
 

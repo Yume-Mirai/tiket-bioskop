@@ -9,9 +9,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 @Component
@@ -87,7 +87,6 @@ public class DataInitializer implements CommandLineRunner {
                     .nomor("081234567890")
                     .tanggal_lahir(LocalDate.of(1990, 1, 1))
                     .status(true)
-                    .createdDate(new Date())
                     .build();
 
             userRepository.save(adminUser);
@@ -115,7 +114,6 @@ public class DataInitializer implements CommandLineRunner {
                     .nomor("081234567891")
                     .tanggal_lahir(LocalDate.of(1995, 5, 15))
                     .status(true)
-                    .createdDate(new Date())
                     .build();
 
             userRepository.save(regularUser);

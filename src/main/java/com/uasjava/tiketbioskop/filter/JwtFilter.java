@@ -46,8 +46,8 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
 
-            Claims claims = jwtProvider.resolveClaims(request);
-            if(claims != null && jwtProvider.validateClaims(claims)){
+            if (jwtProvider.validateToken(accessToken)) {
+                Claims claims = jwtProvider.getAllClaimsFromToken(accessToken);
                 String username = claims.getSubject();
                 List<String> roles = (List<String>) claims.get("authorities");
 

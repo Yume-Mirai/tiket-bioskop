@@ -52,8 +52,7 @@ public class UserServiceImpl implements UserService{
         users.setNomor(dto.getNomor());
         users.setTanggal_lahir(dto.getTanggal_lahir());
         users.setStatus(true);
-        users.setCreatedDate(new Date());
-        users.setUpdateDate(LocalDate.now());
+        // createdAt and updatedAt are handled by @PrePersist and @PreUpdate
 
         users = usersRepository.save(users);
 
@@ -87,8 +86,8 @@ public class UserServiceImpl implements UserService{
             dto.setNomor(user.getNomor());
             dto.setTanggal_lahir(user.getTanggal_lahir());
             dto.setStatus(user.getStatus());
-            dto.setCreatedDate(user.getCreatedDate());
-            dto.setUpdateDate(user.getUpdateDate());
+            dto.setCreatedAt(user.getCreatedAt());
+            dto.setUpdatedAt(user.getUpdatedAt());
             return dto;
         });
     }
@@ -111,8 +110,8 @@ public class UserServiceImpl implements UserService{
             dto.setNomor(user.getNomor());
             dto.setTanggal_lahir(user.getTanggal_lahir());
             dto.setStatus(user.getStatus());
-            dto.setCreatedDate(user.getCreatedDate());
-            dto.setUpdateDate(user.getUpdateDate());
+            dto.setCreatedAt(user.getCreatedAt());
+            dto.setUpdatedAt(user.getUpdatedAt());
             return dto;
         });
     }
@@ -134,8 +133,8 @@ public class UserServiceImpl implements UserService{
             dto.setNomor(user.getNomor());
             dto.setTanggal_lahir(user.getTanggal_lahir());
             dto.setStatus(user.getStatus());
-            dto.setCreatedDate(user.getCreatedDate());
-            dto.setUpdateDate(user.getUpdateDate());
+            dto.setCreatedAt(user.getCreatedAt());
+            dto.setUpdatedAt(user.getUpdatedAt());
             return dto;
         });
     }

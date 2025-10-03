@@ -1,6 +1,7 @@
 package com.uasjava.tiketbioskop.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -15,43 +16,95 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired
-    private JavaMailSender javaMailSender;
-    @Autowired
-    private TemplateEngine templateEngine;
+    private final JavaMailSender javaMailSender;
+    private final TemplateEngine templateEngine;
 
-    public EmailServiceImpl(JavaMailSender javaMailSender) {
-        this.javaMailSender = javaMailSender;
-    }
-
-    @Value("${mail.username}")
+    @Value("${mail.username:noreply@tiketbioskop.com}")
     private String fromEmail;
+
+    @Value("${spring.application.name:Tiket Bioskop}")
+    private String appName;
 
     @Override
     public void sendEmail(String to, String subject, String body) {
-        SimpleMailMessage message = new SimpleMailMessage();
+        try {
+            if (to == null || to.trim().isEmpty()) {
+                log.warn("Email tidak dikirim karena alamat email kosong");
+                return;
+            }
 
-        message.setFrom(fromEmail);
-        // message.setFrom("asfari160904@gmail.com");
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(body);
-        javaMailSender.send(message);
+            if (!isValidEmail(to)) {
+                log.warn("Email tidak dikirim karena format email tidak valid: {}", to);
+                return;
+            }
+
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(to);
+            message.setSubject(subject != null ? subject : "Notifikasi");
+            message.setText(body != null ? body : "");
+
+            javaMailSender.send(message);
+            log.info("Email berhasil dikirim ke: {}", to);
+
+        } catch (Exception e) {
+            log.error("Gagal mengirim email ke {}: {}", to, e.getMessage(), e);
+            throw new RuntimeException("Gagal mengirim email", e);
+        }
     }
 
+    @Override
     public void sendPaymentEmail(String to, String subject, String templateName, Context context)
             throws MessagingException {
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        try {
+            if (to == null || to.trim().isEmpty()) {
+                log.warn("Email pembayaran tidak dikirim karena alamat email kosong");
+                return;
+            }
 
-        String html = templateEngine.process(templateName, context);
+            if (!isValidEmail(to)) {
+                log.warn("Email pembayaran tidak dikirim karena format email tidak valid: {}", to);
+                return;
+            }
 
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(html, true);
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        javaMailSender.send(message);
+            if (context == null) {
+                context = new Context();
+            }
+
+            // Tambahkan informasi aplikasi ke context
+            context.setVariable("appName", appName);
+            context.setVariable("currentYear", java.time.LocalDate.now().getYear());
+
+            String html = templateEngine.process(templateName, context);
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject != null ? subject : "Konfirmasi Pembayaran");
+            helper.setText(html, true);
+
+            javaMailSender.send(message);
+            log.info("Email pembayaran berhasil dikirim ke: {}", to);
+
+        } catch (MessagingException e) {
+            log.error("Gagal mengirim email pembayaran ke {}: {}", to, e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error tidak terduga saat mengirim email pembayaran ke {}: {}", to, e.getMessage(), e);
+            throw new MessagingException("Gagal mengirim email pembayaran", e);
+        }
+    }
+
+    /**
+     * Validasi format email sederhana
+     */
+    private boolean isValidEmail(String email) {
+        return email != null && email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
 }

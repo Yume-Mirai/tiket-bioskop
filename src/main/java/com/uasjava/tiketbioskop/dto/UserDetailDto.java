@@ -1,7 +1,7 @@
 package com.uasjava.tiketbioskop.dto;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +19,7 @@ public class UserDetailDto {
     private String nomor;
     private LocalDate tanggal_lahir;
     private Boolean status;
-    private Date createdDate;
-    private LocalDate updateDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String role;
 }
