@@ -1,6 +1,7 @@
 package com.uasjava.tiketbioskop.provider;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,9 @@ public class JwtProvider {
 
     @PostConstruct
     public void init() {
-        this.jwtParser = Jwts.parser().setSigningKey(secretKey.getBytes());
+        this.jwtParser = Jwts.parserBuilder()
+                .setSigningKey(secretKey.getBytes())
+                .build();
     }
 
     public String generateToken(Integer userId, String username, List<String> roles) {
@@ -46,7 +49,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setClaims(claims)
                 .setExpiration(tokenValidity)
-                .signWith(SignatureAlgorithm.HS512, secretKey.getBytes())
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
     }
 

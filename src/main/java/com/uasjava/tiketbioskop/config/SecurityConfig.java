@@ -25,23 +25,36 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
-                            auth.requestMatchers("/login","/users/register",
-                                            "/email/send",
-                                            "/report/**",
-                                            "/users/register",
-                                            "/api-docs/**",
-                                            "/swagger-ui/**",
-                                            "/swagger-ui.html",
-                                            "/api/laporan/**",
-                                            "/api/transaksi/**",
-                                            "/all/film/**")
-                            .permitAll()
-                            .requestMatchers("/admin/**").hasAuthority("admin")
-                            .requestMatchers("/user/**").hasAuthority("user")
-                            .requestMatchers("/view/**").hasAnyAuthority("user", "admin")
-                            .anyRequest()
-                            .authenticated())
+                    auth
+                        // Public endpoints - tidak memerlukan autentikasi
+                        .requestMatchers("/login", "/users/register", "/email/send").permitAll()
+                        .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
 
+                        // Endpoint film yang bisa diakses user (read-only)
+                        .requestMatchers("/all/film", "/all/film/{id}", "/all/film/{id}/poster",
+                                       "/all/film/genre", "/all/film/search", "/all/film/filter",
+                                       "/all/film/advanced-search").hasAnyRole("USER", "ADMIN")
+
+                        // Endpoint transaksi user
+                        .requestMatchers("/api/transaksi/checkout", "/api/transaksi/konfirmasi",
+                                       "/api/transaksi/cancel/{transaksiId}", "/api/transaksi/my-transactions",
+                                       "/api/transaksi/filter", "/api/transaksi/search").hasRole("USER")
+
+                        // Endpoint tiket user (download tiket sendiri)
+                        .requestMatchers("/api/laporan/tiket/pdf/{transaksiId}", "/api/laporan/tiket/download/{transaksiId}").hasRole("USER")
+
+                        // Admin-only endpoints
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/users/all", "/users/search", "/users/filter").hasRole("ADMIN")
+                        .requestMatchers("/api/laporan/**").hasRole("ADMIN")
+
+                        // Endpoint forgot password
+                        .requestMatchers("/user/forgot-password/**").permitAll()
+
+                        // Semua endpoint lainnya memerlukan autentikasi
+                        .anyRequest().authenticated()
+                )
                 .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

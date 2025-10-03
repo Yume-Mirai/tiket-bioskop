@@ -1,5 +1,6 @@
 package com.uasjava.tiketbioskop.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 // import java.util.stream.Collectors;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.uasjava.tiketbioskop.dto.LoginDto;
-import com.uasjava.tiketbioskop.dto.UserDetailDto;
+import com.uasjava.tiketbioskop.dto.LoginResponseDto;
 import com.uasjava.tiketbioskop.model.UserRole;
 import com.uasjava.tiketbioskop.model.Users;
 import com.uasjava.tiketbioskop.provider.JwtProvider;
@@ -34,7 +35,7 @@ public class LoginServiceImpl implements LoginService {
     private final EmailService emailService;
 
     @Override
-    public UserDetailDto login(LoginDto dto) {
+    public LoginResponseDto login(LoginDto dto) {
         Optional<Users> optionalUsers = usersRepository.findByUsername(dto.getUsername());
 
         if (optionalUsers.isPresent()) {
@@ -50,15 +51,20 @@ public class LoginServiceImpl implements LoginService {
 
                 String accessToken = jwtProvider.generateToken(users.getId(), users.getUsername(), roles);
 
+                // Hitung waktu expiration token
+                Date expirationDate = jwtProvider.getAllClaimsFromToken(accessToken).getExpiration();
+
                 String subject = "Login Berhasil - Tiket Bioskop";
                 String body = "Halo " + users.getUsername() + ",\n\n" +
                         "Kamu berhasil login ke sistem Tiket Bioskop.\n\n" +
                         "Berikut adalah token aksesmu (jangan dibagikan kepada siapa pun):\n\n" +
                         accessToken + "\n\n" +
+                        "Token akan expired pada: " + expirationDate + "\n\n" +
                         "Salam,\nTiket Bioskop";
                 emailService.sendEmail(users.getEmail(), subject, body);
 
-                return UserDetailDto.builder()
+                return LoginResponseDto.builder()
+                        .accessToken(accessToken)
                         .id(users.getId())
                         .username(users.getUsername())
                         .email(users.getEmail())
@@ -68,6 +74,7 @@ public class LoginServiceImpl implements LoginService {
                         .createdAt(users.getCreatedAt())
                         .updatedAt(users.getUpdatedAt())
                         .role(String.join(",", roles))
+                        .expiresAt(expirationDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime())
                         .build();
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username atau Password Salah");

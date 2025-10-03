@@ -156,13 +156,15 @@ public class TransaksiController {
 
     @GetMapping("/my-transactions")
     @Operation(summary = "Menampilkan transaksi user dengan pagination dan sorting")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<GenericResponse<Page<TransaksiDTO>>> getMyTransactions(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "10000") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
 
         try {
+            log.info("User mengambil data transaksi sendiri");
             Page<TransaksiDTO> transactions = transaksiService.getMyTransactions(page, size, sortBy, sortDir);
 
             GenericResponse<Page<TransaksiDTO>> response = GenericResponse.<Page<TransaksiDTO>>builder()
@@ -189,23 +191,37 @@ public class TransaksiController {
 
     @GetMapping("/filter")
     @Operation(summary = "Filter transaksi user berdasarkan status dengan pagination")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<TransaksiDTO>> filterMyTransactionsByStatus(
             @RequestParam String status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "10000") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
-        return ResponseEntity.ok(transaksiService.filterMyTransactionsByStatus(status, page, size, sortBy, sortDir));
+        try {
+            log.info("User filter transaksi berdasarkan status: {} - page: {}, size: {}", status, page, size);
+            return ResponseEntity.ok(transaksiService.filterMyTransactionsByStatus(status, page, size, sortBy, sortDir));
+        } catch (Exception e) {
+            log.error("Error saat filter transaksi: {}", e.getMessage(), e);
+            throw new RuntimeException("Gagal filter transaksi");
+        }
     }
 
     @GetMapping("/search")
     @Operation(summary = "Search transaksi user berdasarkan kode pembayaran dengan pagination")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<TransaksiDTO>> searchMyTransactions(
             @RequestParam String kodePembayaran,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "10000") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
-        return ResponseEntity.ok(transaksiService.searchMyTransactions(kodePembayaran, page, size, sortBy, sortDir));
+        try {
+            log.info("User mencari transaksi dengan kode: {} - page: {}, size: {}", kodePembayaran, page, size);
+            return ResponseEntity.ok(transaksiService.searchMyTransactions(kodePembayaran, page, size, sortBy, sortDir));
+        } catch (Exception e) {
+            log.error("Error saat mencari transaksi: {}", e.getMessage(), e);
+            throw new RuntimeException("Gagal mencari transaksi");
+        }
     }
 }

@@ -12,9 +12,17 @@ import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.draw.LineSeparator;
+import java.awt.Color;
 
 @Service
 @RequiredArgsConstructor
@@ -41,52 +49,136 @@ public class TiketPdfService {
                 throw new ResourceNotFoundException("Tiket tidak ditemukan untuk transaksi ID: " + transaksiId);
             }
 
-            StringBuilder tiketContent = new StringBuilder();
+            // Create PDF document using OpenPDF
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            Document document = new Document(PageSize.A4, 50, 50, 50, 50);
+            PdfWriter.getInstance(document, baos);
+
+            document.open();
+
+            // Set font
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, Font.BOLD);
+            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Font.BOLD);
+            Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL);
+            Font smallFont = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.NORMAL);
 
             // Header Tiket
-            tiketContent.append("=".repeat(60)).append("\n");
-            tiketContent.append("           TIKET BIOSKOP\n");
-            tiketContent.append("=".repeat(60)).append("\n\n");
+            Paragraph header = new Paragraph("TIKET BIOSKOP", titleFont);
+            header.setAlignment(Element.ALIGN_CENTER);
+            header.setSpacingAfter(20);
+            document.add(header);
+
+            // Border line
+            addLineSeparator(document);
 
             // Informasi Transaksi
-            tiketContent.append("Kode Pembayaran: ").append(transaksi.getKodePembayaran()).append("\n");
-            tiketContent.append("Tanggal Transaksi: ").append(transaksi.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"))).append("\n");
-            tiketContent.append("Status: ").append(transaksi.getStatus().name()).append("\n");
-            tiketContent.append("Metode Pembayaran: ").append(transaksi.getMetodePembayaran()).append("\n");
-            tiketContent.append("Total Harga: Rp ").append(transaksi.getTotalHarga()).append("\n\n");
+            Paragraph transaksiInfo = new Paragraph("INFORMASI TRANSAKSI", headerFont);
+            transaksiInfo.setSpacingAfter(10);
+            document.add(transaksiInfo);
+
+            PdfPTable transaksiTable = new PdfPTable(2);
+            transaksiTable.setWidthPercentage(100);
+            transaksiTable.setWidths(new float[]{1, 2});
+            transaksiTable.setSpacingAfter(15);
+
+            addTableRow(transaksiTable, "Kode Pembayaran:", transaksi.getKodePembayaran(), normalFont);
+            addTableRow(transaksiTable, "Tanggal Transaksi:", transaksi.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")), normalFont);
+            addTableRow(transaksiTable, "Status:", transaksi.getStatus().name(), normalFont);
+            addTableRow(transaksiTable, "Metode Pembayaran:", transaksi.getMetodePembayaran(), normalFont);
+            addTableRow(transaksiTable, "Total Harga:", "Rp " + transaksi.getTotalHarga(), normalFont);
+
+            document.add(transaksiTable);
 
             // Informasi Jadwal
-            tiketContent.append("Detail Film:\n");
-            tiketContent.append("- Judul: ").append(transaksi.getJadwal().getFilm().getJudul()).append("\n");
-            tiketContent.append("- Genre: ").append(transaksi.getJadwal().getFilm().getGenre()).append("\n");
-            tiketContent.append("- Durasi: ").append(transaksi.getJadwal().getFilm().getDurasi()).append(" menit\n");
-            tiketContent.append("- Bioskop: ").append(transaksi.getJadwal().getBioskop().getNama()).append("\n");
-            tiketContent.append("- Lokasi: ").append(transaksi.getJadwal().getBioskop().getLokasi()).append("\n");
-            tiketContent.append("- Tanggal: ").append(transaksi.getJadwal().getTanggal().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))).append("\n");
-            tiketContent.append("- Jam: ").append(transaksi.getJadwal().getJam().format(DateTimeFormatter.ofPattern("HH:mm"))).append("\n\n");
+            Paragraph jadwalInfo = new Paragraph("DETAIL FILM & JADWAL", headerFont);
+            jadwalInfo.setSpacingAfter(10);
+            document.add(jadwalInfo);
+
+            PdfPTable jadwalTable = new PdfPTable(2);
+            jadwalTable.setWidthPercentage(100);
+            jadwalTable.setWidths(new float[]{1, 2});
+            jadwalTable.setSpacingAfter(15);
+
+            addTableRow(jadwalTable, "Judul Film:", transaksi.getJadwal().getFilm().getJudul(), normalFont);
+            addTableRow(jadwalTable, "Genre:", transaksi.getJadwal().getFilm().getGenre(), normalFont);
+            addTableRow(jadwalTable, "Durasi:", transaksi.getJadwal().getFilm().getDurasi() + " menit", normalFont);
+            addTableRow(jadwalTable, "Bioskop:", transaksi.getJadwal().getBioskop().getNama(), normalFont);
+            addTableRow(jadwalTable, "Lokasi:", transaksi.getJadwal().getBioskop().getLokasi(), normalFont);
+            addTableRow(jadwalTable, "Tanggal:", transaksi.getJadwal().getTanggal().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")), normalFont);
+            addTableRow(jadwalTable, "Jam:", transaksi.getJadwal().getJam().format(DateTimeFormatter.ofPattern("HH:mm")), normalFont);
+
+            document.add(jadwalTable);
 
             // Detail Kursi
-            tiketContent.append("Kursi yang dipesan:\n");
+            Paragraph kursiInfo = new Paragraph("KURSI YANG DIPESAN", headerFont);
+            kursiInfo.setSpacingAfter(10);
+            document.add(kursiInfo);
+
+            PdfPTable kursiTable = new PdfPTable(3);
+            kursiTable.setWidthPercentage(100);
+            kursiTable.setWidths(new float[]{2, 1, 2});
+            kursiTable.setSpacingAfter(15);
+
+            // Header tabel kursi
+            PdfPCell cell = new PdfPCell(new Phrase("Nomor Kursi", headerFont));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            kursiTable.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Tipe", headerFont));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            kursiTable.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Harga", headerFont));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            kursiTable.addCell(cell);
+
+            // Data kursi
             for (Tiket tiket : tiketList) {
-                tiketContent.append("- ").append(tiket.getKursi().getNomor())
-                    .append(" (").append(tiket.getKursi().getTipe()).append(")")
-                    .append(" - Rp ").append(tiket.getHarga()).append("\n");
+                kursiTable.addCell(new Phrase(tiket.getKursi().getNomor(), normalFont));
+                kursiTable.addCell(new Phrase(tiket.getKursi().getTipe().name(), normalFont));
+                kursiTable.addCell(new Phrase("Rp " + tiket.getHarga(), normalFont));
             }
 
-            tiketContent.append("\n");
-            tiketContent.append("=".repeat(60)).append("\n");
-            tiketContent.append("Simpan tiket ini sebagai bukti pembayaran\n");
-            tiketContent.append("Tiket tidak dapat diuangkan kembali\n");
-            tiketContent.append("Terima kasih telah menggunakan layanan kami!\n");
-            tiketContent.append("=".repeat(60)).append("\n");
+            document.add(kursiTable);
+
+            // Footer
+            addLineSeparator(document);
+
+            Paragraph footer = new Paragraph("Simpan tiket ini sebagai bukti pembayaran yang sah.\n" +
+                    "Tiket tidak dapat diuangkan kembali.\n" +
+                    "Terima kasih telah menggunakan layanan kami!", smallFont);
+            footer.setAlignment(Element.ALIGN_CENTER);
+            footer.setSpacingBefore(20);
+            document.add(footer);
+
+            document.close();
 
             log.info("Berhasil generate tiket PDF untuk transaksi ID: {}", transaksiId);
-            return tiketContent.toString().getBytes();
+            return baos.toByteArray();
 
         } catch (Exception e) {
             log.error("Error saat generate tiket PDF untuk transaksi ID {}: {}", transaksiId, e.getMessage(), e);
             throw new IOException("Gagal generate tiket PDF", e);
         }
+    }
+
+    private void addLineSeparator(Document document) throws DocumentException {
+        LineSeparator line = new LineSeparator();
+        line.setOffset(-5);
+        document.add(new Chunk(line));
+        document.add(new Chunk("\n"));
+    }
+
+    private void addTableRow(PdfPTable table, String label, String value, Font font) {
+        PdfPCell labelCell = new PdfPCell(new Phrase(label, font));
+        labelCell.setBorder(Rectangle.NO_BORDER);
+        labelCell.setPaddingBottom(5);
+        table.addCell(labelCell);
+
+        PdfPCell valueCell = new PdfPCell(new Phrase(value, font));
+        valueCell.setBorder(Rectangle.NO_BORDER);
+        valueCell.setPaddingBottom(5);
+        table.addCell(valueCell);
     }
 
     public void exportTiketToPdf(Long transaksiId, HttpServletResponse response) throws IOException {

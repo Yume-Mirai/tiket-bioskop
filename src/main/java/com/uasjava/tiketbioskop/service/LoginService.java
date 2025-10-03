@@ -1,8 +1,8 @@
 package com.uasjava.tiketbioskop.service;
 
 import com.uasjava.tiketbioskop.dto.LoginDto;
-import com.uasjava.tiketbioskop.dto.UserDetailDto;
+import com.uasjava.tiketbioskop.dto.LoginResponseDto;
 
 public interface LoginService {
-    UserDetailDto login(LoginDto dto);
+    LoginResponseDto login(LoginDto dto);
 }

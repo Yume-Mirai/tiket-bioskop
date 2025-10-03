@@ -10,9 +10,17 @@ import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.draw.LineSeparator;
+import java.awt.Color;
 
 @Service
 @RequiredArgsConstructor
@@ -32,31 +40,69 @@ public class TransaksiPdfService {
                 throw new ResourceNotFoundException("Tidak ada data transaksi untuk generate laporan PDF");
             }
 
-            // Untuk implementasi PDF yang lebih modern, kita akan menggunakan iText 8 atau library lain
-            // Untuk sementara, return struktur data yang akan digunakan untuk generate PDF
-            StringBuilder pdfContent = new StringBuilder();
-            pdfContent.append("LAPORAN TRANSAKSI TIKET BIOSKOP\n");
-            pdfContent.append("Generated at: ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))).append("\n\n");
+            // Create PDF document using OpenPDF
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            Document document = new Document(PageSize.A4.rotate(), 50, 50, 50, 50); // Landscape orientation for better table display
+            PdfWriter.getInstance(document, baos);
 
-            pdfContent.append(String.format("%-20s %-30s %-15s %-15s %-15s %-20s%n",
-                "Username", "Film", "Metode Bayar", "Total Harga", "Status", "Waktu Transaksi"));
-            pdfContent.append("-".repeat(130)).append("\n");
+            document.open();
 
-            for (Transaksi transaksi : transaksiList) {
-                pdfContent.append(String.format("%-20s %-30s %-15s Rp %-12.0f %-15s %-20s%n",
-                    transaksi.getUsers().getUsername(),
-                    truncateString(transaksi.getJadwal().getFilm().getJudul(), 28),
-                    truncateString(transaksi.getMetodePembayaran(), 13),
-                    (double) transaksi.getTotalHarga(),
-                    transaksi.getStatus().name(),
-                    transaksi.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"))
-                ));
+            // Set fonts
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, Font.BOLD);
+            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Font.BOLD);
+            Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 9, Font.NORMAL);
+
+            // Title
+            Paragraph title = new Paragraph("LAPORAN TRANSAKSI TIKET BIOSKOP", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(20);
+            document.add(title);
+
+            // Generated date
+            Paragraph dateInfo = new Paragraph("Generated at: " +
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")), normalFont);
+            dateInfo.setAlignment(Element.ALIGN_CENTER);
+            dateInfo.setSpacingAfter(20);
+            document.add(dateInfo);
+
+            // Create table with 6 columns
+            PdfPTable table = new PdfPTable(6);
+            table.setWidthPercentage(100);
+            table.setWidths(new float[]{2, 3, 2, 2, 2, 3});
+            table.setSpacingAfter(20);
+
+            // Table headers
+            String[] headers = {"Username", "Film", "Metode Bayar", "Total Harga", "Status", "Waktu Transaksi"};
+
+            for (String header : headers) {
+                PdfPCell headerCell = new PdfPCell(new Phrase(header, headerFont));
+                headerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                headerCell.setBackgroundColor(new Color(220, 220, 220));
+                headerCell.setPadding(8);
+                table.addCell(headerCell);
             }
 
-            pdfContent.append("\nTotal Transaksi: ").append(transaksiList.size()).append(" items");
+            // Table data
+            for (Transaksi transaksi : transaksiList) {
+                table.addCell(new Phrase(transaksi.getUsers().getUsername(), normalFont));
+                table.addCell(new Phrase(truncateString(transaksi.getJadwal().getFilm().getJudul(), 25), normalFont));
+                table.addCell(new Phrase(truncateString(transaksi.getMetodePembayaran(), 12), normalFont));
+                table.addCell(new Phrase("Rp " + transaksi.getTotalHarga(), normalFont));
+                table.addCell(new Phrase(transaksi.getStatus().name(), normalFont));
+                table.addCell(new Phrase(transaksi.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")), normalFont));
+            }
+
+            document.add(table);
+
+            // Summary
+            Paragraph summary = new Paragraph("Total Transaksi: " + transaksiList.size() + " items", headerFont);
+            summary.setSpacingBefore(15);
+            document.add(summary);
+
+            document.close();
 
             log.info("Berhasil generate laporan PDF dengan {} transaksi", transaksiList.size());
-            return pdfContent.toString().getBytes();
+            return baos.toByteArray();
 
         } catch (Exception e) {
             log.error("Error saat generate laporan PDF: {}", e.getMessage(), e);
