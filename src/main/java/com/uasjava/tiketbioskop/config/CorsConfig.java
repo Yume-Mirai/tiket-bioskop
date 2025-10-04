@@ -19,10 +19,15 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Izinkan origin dari localhost untuk development
+        // Izinkan origin dari localhost untuk development (termasuk Vite dev server)
         configuration.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:*",
-            "https://localhost:*"
+            "https://localhost:*",
+            "http://127.0.0.1:*",
+            "https://127.0.0.1:*",
+            "http://localhost:5173",  // Vite default port
+            "http://localhost:3000",  // React default port
+            "http://localhost:4173"   // Vite preview port
         ));
 
         // Izinkan semua method HTTP

@@ -24,6 +24,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers
+                    // Security headers untuk React SPA
+                    .frameOptions(frameOptions -> frameOptions.deny())
+                    .contentTypeOptions(contentTypeOptions -> {})
+                    .httpStrictTransportSecurity(hstsConfig -> hstsConfig
+                        .maxAgeInSeconds(31536000)
+                        .includeSubDomains(true)
+                    )
+                )
                 .authorizeHttpRequests(auth ->
                     auth
                         // Public endpoints - tidak memerlukan autentikasi
@@ -31,10 +40,20 @@ public class SecurityConfig {
                         .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
+                        // Static file serving untuk React
+                        .requestMatchers("/uploads/**", "/static/**").permitAll()
+
                         // Endpoint film yang bisa diakses user (read-only)
                         .requestMatchers("/all/film", "/all/film/{id}", "/all/film/{id}/poster",
                                        "/all/film/genre", "/all/film/search", "/all/film/filter",
                                        "/all/film/advanced-search").hasAnyRole("USER", "ADMIN")
+
+                        // Endpoint bioskop dan jadwal (read-only untuk user)
+                        .requestMatchers("/all/bioskop", "/all/bioskop/{id}",
+                                       "/all/jadwal", "/all/jadwal/{id}").hasAnyRole("USER", "ADMIN")
+
+                        // Endpoint kursi untuk user
+                        .requestMatchers("/all/kursi/available/**").hasAnyRole("USER", "ADMIN")
 
                         // Endpoint transaksi user
                         .requestMatchers("/api/transaksi/checkout", "/api/transaksi/konfirmasi",
