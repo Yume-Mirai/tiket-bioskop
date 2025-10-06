@@ -26,7 +26,7 @@ FROM openjdk:21-slim
 WORKDIR /app
 
 # Copy hasil build dari stage sebelumnya
-COPY --from=build /app/target/tiketbioskop-0.0.1-SNAPSHOT.jar backend.jar
+COPY --from=build /app/target/tiketbioskop-0.0.1-SNAPSHOT.jar tiketbioskop.jar
 
 # Expose port Spring Boot
 EXPOSE 8080
