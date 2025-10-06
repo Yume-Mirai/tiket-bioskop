@@ -27,7 +27,7 @@ public class BioskopController {
     public ResponseEntity<WebResponse<BioskopDTO>> create(@Valid @RequestBody BioskopDTO dto) {
         try {
             log.info("Admin membuat bioskop baru: {}", dto.getNama());
-            return ResponseEntity.ok(new WebResponse<>(200, "Berhasil tambah", bioskopService.create(dto)));
+            return ResponseEntity.ok(new WebResponse<BioskopDTO>(200, "Berhasil tambah", bioskopService.create(dto)));
         } catch (Exception e) {
             log.error("Error saat membuat bioskop: {}", e.getMessage(), e);
             throw new RuntimeException("Gagal membuat bioskop baru");
@@ -53,7 +53,7 @@ public class BioskopController {
                     org.springframework.data.domain.Sort.by(sortBy).ascending()
             );
 
-            return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", bioskopService.getAll(pageable)));
+            return ResponseEntity.ok(new WebResponse<Page<BioskopDTO>>(200, "Berhasil ambil data", bioskopService.getAll(pageable)));
         } catch (Exception e) {
             log.error("Error saat mengambil data bioskop: {}", e.getMessage(), e);
             throw new RuntimeException("Gagal mengambil data bioskop");
@@ -71,7 +71,7 @@ public class BioskopController {
             @RequestParam(defaultValue = "asc") String sortDir) {
         try {
             log.info("Mencari bioskop dengan nama: {} - page: {}, size: {}", nama, page, size);
-            return ResponseEntity.ok(new WebResponse<>(200, "Berhasil cari data",
+            return ResponseEntity.ok(new WebResponse<Page<BioskopDTO>>(200, "Berhasil cari data",
                 bioskopService.searchBioskop(nama, page, size, sortBy, sortDir)));
         } catch (Exception e) {
             log.error("Error saat mencari bioskop: {}", e.getMessage(), e);
@@ -90,7 +90,7 @@ public class BioskopController {
             @RequestParam(defaultValue = "asc") String sortDir) {
         try {
             log.info("Filter bioskop berdasarkan lokasi: {} - page: {}, size: {}", lokasi, page, size);
-            return ResponseEntity.ok(new WebResponse<>(200, "Berhasil filter data",
+            return ResponseEntity.ok(new WebResponse<Page<BioskopDTO>>(200, "Berhasil filter data",
                 bioskopService.filterBioskopByLocation(lokasi, page, size, sortBy, sortDir)));
         } catch (Exception e) {
             log.error("Error saat filter bioskop: {}", e.getMessage(), e);
@@ -104,7 +104,7 @@ public class BioskopController {
     public ResponseEntity<WebResponse<BioskopDTO>> getById(@PathVariable Long id) {
         try {
             log.info("Mengambil bioskop dengan ID: {}", id);
-            return ResponseEntity.ok(new WebResponse<>(200, "Berhasil ambil data", bioskopService.getById(id)));
+            return ResponseEntity.ok(new WebResponse<BioskopDTO>(200, "Berhasil ambil data", bioskopService.getById(id)));
         } catch (Exception e) {
             log.error("Error saat mengambil bioskop dengan ID {}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Gagal mengambil data bioskop");
@@ -117,7 +117,7 @@ public class BioskopController {
     public ResponseEntity<WebResponse<BioskopDTO>> update(@PathVariable Long id, @Valid @RequestBody BioskopDTO dto) {
         try {
             log.info("Admin mengupdate bioskop dengan ID: {}", id);
-            return ResponseEntity.ok(new WebResponse<>(200, "Berhasil update", bioskopService.update(id, dto)));
+            return ResponseEntity.ok(new WebResponse<BioskopDTO>(200, "Berhasil update", bioskopService.update(id, dto)));
         } catch (Exception e) {
             log.error("Error saat update bioskop dengan ID {}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Gagal mengupdate bioskop");
@@ -131,7 +131,7 @@ public class BioskopController {
         try {
             log.info("Admin menghapus bioskop dengan ID: {}", id);
             bioskopService.delete(id);
-            return ResponseEntity.ok(new WebResponse<>(200, "Berhasil hapus", "OK"));
+            return ResponseEntity.ok(new WebResponse<String>(200, "Berhasil hapus", "OK"));
         } catch (Exception e) {
             log.error("Error saat menghapus bioskop dengan ID {}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Gagal menghapus bioskop");
