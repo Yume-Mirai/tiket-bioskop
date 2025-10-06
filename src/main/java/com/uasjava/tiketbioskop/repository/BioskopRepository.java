@@ -32,8 +32,12 @@ public interface BioskopRepository extends JpaRepository<Bioskop, Long> {
 
     // Cari bioskop berdasarkan nama atau lokasi
     @Query("SELECT b FROM Bioskop b WHERE LOWER(b.nama) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "OR LOWER(b.lokasi) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+            "OR LOWER(b.lokasi) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Bioskop> findByNamaOrLokasi(@Param("keyword") String keyword, Pageable pageable);
+
+    // Cari bioskop berdasarkan nama dan lokasi (exact match)
+    @Query("SELECT b FROM Bioskop b WHERE b.nama = :nama AND b.lokasi = :lokasi")
+    Optional<Bioskop> findByNamaAndLokasi(@Param("nama") String nama, @Param("lokasi") String lokasi);
 
     // Hitung jumlah kursi di setiap bioskop
     @Query("SELECT b.nama, COUNT(k) FROM Bioskop b LEFT JOIN b.jadwalList j LEFT JOIN Kursi k ON k.bioskop = b GROUP BY b.id, b.nama")

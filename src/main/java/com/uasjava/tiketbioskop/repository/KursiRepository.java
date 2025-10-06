@@ -29,4 +29,8 @@ public interface KursiRepository extends JpaRepository<Kursi, Long> {
            "AND t.transaksi.status = 'PENDING')")
     List<Kursi> findPendingKursiForJadwal(@Param("kursiIds") List<Long> kursiIds,
                                          @Param("jadwalId") Long jadwalId);
+
+    // Cari kursi berdasarkan bioskop ID dan nomor kursi
+    @Query("SELECT k FROM Kursi k WHERE k.bioskop.id = :bioskopId AND k.nomor = :nomor")
+    List<Kursi> findByBioskopIdAndNomor(@Param("bioskopId") Long bioskopId, @Param("nomor") String nomor);
 }

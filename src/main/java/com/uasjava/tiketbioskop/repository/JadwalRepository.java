@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public interface JadwalRepository extends JpaRepository<Jadwal, Long> {
@@ -41,4 +42,9 @@ public interface JadwalRepository extends JpaRepository<Jadwal, Long> {
     @Query("SELECT COUNT(j) > 0 FROM Jadwal j WHERE j.bioskop = :bioskop AND j.tanggal = :tanggal AND j.jam = :jam AND j.id != :jadwalId")
     boolean existsConflictingSchedule(@Param("bioskop") Bioskop bioskop, @Param("tanggal") LocalDate tanggal,
                                      @Param("jam") java.time.LocalTime jam, @Param("jadwalId") Long jadwalId);
+
+    // Cari jadwal berdasarkan film ID, bioskop ID, tanggal, dan jam
+    @Query("SELECT j FROM Jadwal j WHERE j.film.id = :filmId AND j.bioskop.id = :bioskopId AND j.tanggal = :tanggal AND j.jam = :jam")
+    List<Jadwal> findByFilmIdAndBioskopIdAndTanggalAndJam(@Param("filmId") Long filmId, @Param("bioskopId") Long bioskopId,
+                                                          @Param("tanggal") LocalDate tanggal, @Param("jam") LocalTime jam);
 }

@@ -7,12 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -27,29 +29,220 @@ public class DataInitializer implements CommandLineRunner {
     private final JadwalRepository jadwalRepository;
     private final KursiRepository kursiRepository;
 
+    /**
+     * Method untuk mencari data bioskop yang belum dibuat dengan kondisi spesifik
+     */
+    private List<String> findMissingBioskopData() {
+        List<String> missingData = new ArrayList<>();
+
+        // Data bioskop yang akan dicek
+        String[][] bioskopData = {
+            {"CGV Grand Indonesia", "Jakarta Pusat"},
+            {"XXI Plaza Indonesia", "Jakarta Selatan"},
+            {"Cinepolis Grand Mall", "Bekasi"}
+        };
+
+        for (String[] data : bioskopData) {
+            String nama = data[0];
+            String lokasi = data[1];
+            if (bioskopRepository.findByNamaAndLokasi(nama, lokasi) == null) {
+                missingData.add("Bioskop: " + nama + " - " + lokasi);
+            }
+        }
+
+        return missingData;
+    }
+
+    /**
+     * Method untuk mencari data film yang belum dibuat dengan kondisi spesifik
+     */
+    private List<String> findMissingFilmData() {
+        List<String> missingData = new ArrayList<>();
+
+        // Data film yang akan dicek (judul, genre, durasi, sinopsis, cast, trailer, status)
+        Object[][] filmData = {
+            {"Avengers: Endgame", "Action", 181,
+             "After the devastating events of Avengers: Infinity War, the universe is in ruins due to the snap that wiped out half of all life.",
+             "Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth, Scarlett Johansson",
+             "https://youtube.com/avengers-endgame", Film.StatusFilm.TAYANG},
+
+            {"Spider-Man: No Way Home", "Action", 148,
+             "With Spider-Man's identity now revealed, Peter Parker asks Doctor Strange for help to restore his secret.",
+             "Tom Holland, Zendaya, Benedict Cumberbatch, Jacob Batalon, Jon Favreau",
+             "https://youtube.com/spiderman-nowayhome", Film.StatusFilm.TAYANG},
+
+            {"Black Panther", "Action", 134,
+             "T'Challa, heir to the hidden but advanced kingdom of Wakanda, must step forward to lead his people.",
+             "Chadwick Boseman, Michael B. Jordan, Lupita Nyong'o, Danai Gurira, Martin Freeman",
+             "https://youtube.com/blackpanther", Film.StatusFilm.SEGERA_TAYANG},
+
+            {"The Batman", "Action", 176,
+             "When a killer targets Gotham's elite with a series of sadistic machinations, a trail of cryptic clues sends the World's Greatest Detective on an investigation.",
+             "Robert Pattinson, Zoë Kravitz, Jeffrey Wright, Colin Farrell, Paul Dano",
+             "https://youtube.com/thebatman", Film.StatusFilm.TAYANG}
+        };
+
+        for (Object[] data : filmData) {
+            String judul = (String) data[0];
+            String genre = (String) data[1];
+            if (filmRepository.findByJudulAndGenre(judul, genre) == null) {
+                missingData.add("Film: " + judul + " (" + genre + ")");
+            }
+        }
+
+        return missingData;
+    }
+
+    /**
+     * Method untuk mencari data jadwal yang belum dibuat dengan kondisi count dan dependency check
+     */
+    private List<String> findMissingJadwalData() {
+        List<String> missingData = new ArrayList<>();
+
+        // Pastikan ada bioskop dan film sebelum cek jadwal
+        List<Bioskop> bioskopList = bioskopRepository.findAll();
+        List<Film> filmList = filmRepository.findAll();
+
+        if (bioskopList.isEmpty() || filmList.isEmpty()) {
+            missingData.add("Dependency Error: Tidak ada bioskop atau film untuk membuat jadwal");
+            return missingData;
+        }
+
+        Bioskop bioskop = bioskopList.get(0);
+        Film film1 = filmList.get(0);
+        Film film2 = filmList.size() > 1 ? filmList.get(1) : film1;
+
+        // Cek jadwal spesifik yang akan dibuat
+        LocalDate[] tanggalList = {LocalDate.now().plusDays(1), LocalDate.now().plusDays(2)};
+        LocalTime[] jamList = {LocalTime.of(10, 0), LocalTime.of(14, 0), LocalTime.of(18, 0), LocalTime.of(12, 0)};
+
+        int jadwalIndex = 0;
+        for (int i = 0; i < tanggalList.length && jadwalIndex < jamList.length; i++) {
+            for (int j = 0; j < Math.min(2, jamList.length - jadwalIndex); j++) {
+                LocalDate tanggal = tanggalList[i];
+                LocalTime jam = jamList[jadwalIndex];
+
+                Film film = (jadwalIndex == 2) ? film2 : film1;
+                jadwalIndex++;
+
+                if (jadwalRepository.findByFilmIdAndBioskopIdAndTanggalAndJam(
+                        film.getId(), bioskop.getId(), tanggal, jam).isEmpty()) {
+                    missingData.add("Jadwal: " + film.getJudul() + " - " + bioskop.getNama() +
+                                  " pada " + tanggal + " jam " + jam);
+                }
+            }
+        }
+
+        return missingData;
+    }
+
+    /**
+     * Method untuk mencari data kursi yang belum dibuat dengan kondisi count dan dependency check
+     */
+    private List<String> findMissingKursiData() {
+        List<String> missingData = new ArrayList<>();
+
+        // Pastikan ada bioskop sebelum cek kursi
+        List<Bioskop> bioskopList = bioskopRepository.findAll();
+        if (bioskopList.isEmpty()) {
+            missingData.add("Dependency Error: Tidak ada bioskop untuk membuat kursi");
+            return missingData;
+        }
+
+        Bioskop bioskop = bioskopList.get(0);
+
+        // Kursi yang akan dicek
+        String[][] kursiData = {
+            {"A1", "REGULER"},
+            {"A2", "REGULER"},
+            {"A3", "REGULER"},
+            {"B1", "REGULER"},
+            {"B2", "REGULER"},
+            {"C1", "VIP"},
+            {"C2", "VIP"}
+        };
+
+        for (String[] data : kursiData) {
+            String nomor = data[0];
+            String tipeStr = data[1];
+            Kursi.TipeKursi tipe = Kursi.TipeKursi.valueOf(tipeStr);
+
+            if (kursiRepository.findByBioskopIdAndNomor(bioskop.getId(), nomor).isEmpty()) {
+                missingData.add("Kursi: " + nomor + " (" + tipe + ") di " + bioskop.getNama());
+            }
+        }
+
+        return missingData;
+    }
+
+    /**
+     * Method untuk menampilkan summary data yang akan dibuat
+     */
+    private void logMissingDataSummary() {
+        log.info("=== ANALISIS DATA YANG BELUM DIBUAT ===");
+
+        List<String> missingBioskop = findMissingBioskopData();
+        List<String> missingFilm = findMissingFilmData();
+        List<String> missingJadwal = findMissingJadwalData();
+        List<String> missingKursi = findMissingKursiData();
+
+        if (!missingBioskop.isEmpty()) {
+            log.info("Bioskop yang akan dibuat:");
+            missingBioskop.forEach(log::info);
+        }
+
+        if (!missingFilm.isEmpty()) {
+            log.info("Film yang akan dibuat:");
+            missingFilm.forEach(log::info);
+        }
+
+        if (!missingJadwal.isEmpty()) {
+            log.info("Jadwal yang akan dibuat:");
+            missingJadwal.forEach(log::info);
+        }
+
+        if (!missingKursi.isEmpty()) {
+            log.info("Kursi yang akan dibuat:");
+            missingKursi.forEach(log::info);
+        }
+
+        if (missingBioskop.isEmpty() && missingFilm.isEmpty() &&
+            missingJadwal.isEmpty() && missingKursi.isEmpty()) {
+            log.info("Semua data sudah lengkap, tidak ada yang perlu dibuat");
+        }
+
+        log.info("=== AKHIR ANALISIS ===");
+    }
+
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         log.info("Initializing sample data...");
 
-        // Create roles
-        createRoles();
+        try {
+            // Create roles first (independent entities)
+            createRoles();
 
-        // Create users
-        createUsers();
+            // Create users (depends on roles)
+            createUsers();
 
-        // Create bioskop
-        createBioskop();
+            // Create bioskop (independent)
+            createBioskop();
 
-        // Create films
-        createFilms();
+            // Create films (independent)
+            createFilms();
 
-        // Create jadwal
-        createJadwal();
+            // Create jadwal (depends on bioskop and film)
+            createJadwal();
 
-        // Create kursi
-        createKursi();
+            // Create kursi (depends on bioskop)
+            createKursi();
 
-        log.info("Sample data initialization completed!");
+            log.info("Sample data initialization completed successfully!");
+        } catch (Exception e) {
+            log.error("Error initializing sample data: ", e);
+            throw e; // Re-throw to trigger transaction rollback
+        }
     }
 
     private void createRoles() {
@@ -134,170 +327,179 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void createBioskop() {
-        if (bioskopRepository.findByNama("CGV Grand Indonesia") == null) {
-            Bioskop bioskop1 = Bioskop.builder()
-                    .nama("CGV Grand Indonesia")
-                    .lokasi("Jakarta Pusat")
-                    .build();
-            bioskopRepository.save(bioskop1);
-            log.info("Created bioskop: CGV Grand Indonesia");
-        }
+        // Data bioskop yang akan dibuat
+        String[][] bioskopData = {
+            {"CGV Grand Indonesia", "Jakarta Pusat"},
+            {"XXI Plaza Indonesia", "Jakarta Selatan"},
+            {"Cinepolis Grand Mall", "Bekasi"}
+        };
 
-        if (bioskopRepository.findByNama("XXI Plaza Indonesia") == null) {
-            Bioskop bioskop2 = Bioskop.builder()
-                    .nama("XXI Plaza Indonesia")
-                    .lokasi("Jakarta Selatan")
-                    .build();
-            bioskopRepository.save(bioskop2);
-            log.info("Created bioskop: XXI Plaza Indonesia");
-        }
+        for (String[] data : bioskopData) {
+            String nama = data[0];
+            String lokasi = data[1];
 
-        if (bioskopRepository.findByNama("Cinepolis Grand Mall") == null) {
-            Bioskop bioskop3 = Bioskop.builder()
-                    .nama("Cinepolis Grand Mall")
-                    .lokasi("Bekasi")
-                    .build();
-            bioskopRepository.save(bioskop3);
-            log.info("Created bioskop: Cinepolis Grand Mall");
+            try {
+                // Cek apakah bioskop sudah ada
+                Optional<Bioskop> existingBioskop = bioskopRepository.findByNamaAndLokasi(nama, lokasi);
+                if (existingBioskop.isEmpty()) {
+                    // Buat bioskop baru jika belum ada
+                    Bioskop bioskop = Bioskop.builder()
+                            .nama(nama)
+                            .lokasi(lokasi)
+                            .build();
+
+                    bioskopRepository.save(bioskop);
+                    log.info("Created bioskop: {} di {} dengan ID: {}", nama, lokasi, bioskop.getId());
+                } else {
+                    log.info("Bioskop {} di {} already exists, skipping creation", nama, lokasi);
+                }
+            } catch (Exception e) {
+                log.error("Error creating bioskop {} di {}: {}", nama, lokasi, e.getMessage());
+            }
         }
     }
 
     private void createFilms() {
-        if (filmRepository.findByJudul("Avengers: Endgame") == null) {
-            Film film1 = Film.builder()
-                    .judul("Avengers: Endgame")
-                    .genre("Action")
-                    .durasi(181)
-                    .sinopsis("After the devastating events of Avengers: Infinity War, the universe is in ruins.")
-                    .cast("Robert Downey Jr., Chris Evans, Mark Ruffalo")
-                    .trailerUrl("https://youtube.com/avengers")
-                    .status(Film.StatusFilm.TAYANG)
-                    .build();
-            filmRepository.save(film1);
-            log.info("Created film: Avengers: Endgame");
-        }
+        // Data film yang akan dibuat (judul, genre, durasi, sinopsis, cast, trailer, status)
+        Object[][] filmData = {
+            {"Avengers: Endgame", "Action", 181,
+             "After the devastating events of Avengers: Infinity War, the universe is in ruins due to the snap that wiped out half of all life.",
+             "Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth, Scarlett Johansson",
+             "https://youtube.com/avengers-endgame", Film.StatusFilm.TAYANG},
 
-        if (filmRepository.findByJudul("Spider-Man: No Way Home") == null) {
-            Film film2 = Film.builder()
-                    .judul("Spider-Man: No Way Home")
-                    .genre("Action")
-                    .durasi(148)
-                    .sinopsis("Peter Parker seeks help from Doctor Strange to make people forget his identity.")
-                    .cast("Tom Holland, Zendaya, Benedict Cumberbatch")
-                    .trailerUrl("https://youtube.com/spiderman")
-                    .status(Film.StatusFilm.TAYANG)
-                    .build();
-            filmRepository.save(film2);
-            log.info("Created film: Spider-Man: No Way Home");
-        }
+            {"Spider-Man: No Way Home", "Action", 148,
+             "With Spider-Man's identity now revealed, Peter Parker asks Doctor Strange for help to restore his secret.",
+             "Tom Holland, Zendaya, Benedict Cumberbatch, Jacob Batalon, Jon Favreau",
+             "https://youtube.com/spiderman-nowayhome", Film.StatusFilm.TAYANG},
 
-        if (filmRepository.findByJudul("Black Panther") == null) {
-            Film film3 = Film.builder()
-                    .judul("Black Panther")
-                    .genre("Action")
-                    .durasi(134)
-                    .sinopsis("T'Challa returns home to Wakanda to take his place as king.")
-                    .cast("Chadwick Boseman, Michael B. Jordan, Lupita Nyong'o")
-                    .trailerUrl("https://youtube.com/blackpanther")
-                    .status(Film.StatusFilm.SEGERA_TAYANG)
-                    .build();
-            filmRepository.save(film3);
-            log.info("Created film: Black Panther");
-        }
+            {"Black Panther", "Action", 134,
+             "T'Challa, heir to the hidden but advanced kingdom of Wakanda, must step forward to lead his people.",
+             "Chadwick Boseman, Michael B. Jordan, Lupita Nyong'o, Danai Gurira, Martin Freeman",
+             "https://youtube.com/blackpanther", Film.StatusFilm.SEGERA_TAYANG},
 
-        if (filmRepository.findByJudul("The Batman") == null) {
-            Film film4 = Film.builder()
-                    .judul("The Batman")
-                    .genre("Action")
-                    .durasi(176)
-                    .sinopsis("Batman ventures into Gotham City's underworld.")
-                    .cast("Robert Pattinson, Zoë Kravitz, Jeffrey Wright")
-                    .trailerUrl("https://youtube.com/thebatman")
-                    .status(Film.StatusFilm.TAYANG)
-                    .build();
-            filmRepository.save(film4);
-            log.info("Created film: The Batman");
+            {"The Batman", "Action", 176,
+             "When a killer targets Gotham's elite with a series of sadistic machinations, a trail of cryptic clues sends the World's Greatest Detective on an investigation.",
+             "Robert Pattinson, Zoë Kravitz, Jeffrey Wright, Colin Farrell, Paul Dano",
+             "https://youtube.com/thebatman", Film.StatusFilm.TAYANG}
+        };
+
+        for (Object[] data : filmData) {
+            String judul = (String) data[0];
+            String genre = (String) data[1];
+
+            try {
+                // Cek apakah film sudah ada
+                Film existingFilm = filmRepository.findByJudulAndGenre(judul, genre);
+                if (existingFilm == null) {
+                    // Buat film baru jika belum ada
+                    Film film = Film.builder()
+                            .judul(judul)
+                            .genre(genre)
+                            .durasi((Integer) data[2])
+                            .sinopsis((String) data[3])
+                            .cast((String) data[4])
+                            .trailerUrl((String) data[5])
+                            .status((Film.StatusFilm) data[6])
+                            .build();
+
+                    filmRepository.save(film);
+                    log.info("Created film: {} ({}) dengan ID: {}", judul, genre, film.getId());
+                } else {
+                    log.info("Film {} ({}) already exists, skipping creation", judul, genre);
+                }
+            } catch (Exception e) {
+                log.error("Error creating film {} ({}): {}", judul, genre, e.getMessage());
+            }
         }
     }
 
     private void createJadwal() {
-        if (jadwalRepository.count() == 0) {
-            List<Bioskop> bioskopList = bioskopRepository.findAll();
-            List<Film> filmList = filmRepository.findAll();
+        // Pastikan ada bioskop dan film sebelum membuat jadwal
+        List<Bioskop> bioskopList = bioskopRepository.findAll();
+        List<Film> filmList = filmRepository.findAll();
 
-            if (!bioskopList.isEmpty() && !filmList.isEmpty()) {
-                Bioskop bioskop1 = bioskopList.get(0);
-                Film film1 = filmList.get(0);
-                Film film2 = filmList.get(1);
+        log.info("Found {} bioskop and {} films for jadwal creation", bioskopList.size(), filmList.size());
 
-                Jadwal jadwal1 = Jadwal.builder()
-                        .film(film1)
-                        .bioskop(bioskop1)
-                        .tanggal(LocalDate.now().plusDays(1))
-                        .jam(LocalTime.of(10, 0))
-                        .build();
-                jadwalRepository.save(jadwal1);
+        if (bioskopList.isEmpty() || filmList.isEmpty()) {
+            log.warn("Cannot create jadwal: Bioskop or Film data is empty");
+            return;
+        }
 
-                Jadwal jadwal2 = Jadwal.builder()
-                        .film(film1)
-                        .bioskop(bioskop1)
-                        .tanggal(LocalDate.now().plusDays(1))
-                        .jam(LocalTime.of(14, 0))
-                        .build();
-                jadwalRepository.save(jadwal2);
+        Bioskop bioskop1 = bioskopList.get(0);
+        Film film1 = filmList.get(0);
+        Film film2 = filmList.size() > 1 ? filmList.get(1) : film1;
 
-                Jadwal jadwal3 = Jadwal.builder()
-                        .film(film2)
-                        .bioskop(bioskop1)
-                        .tanggal(LocalDate.now().plusDays(1))
-                        .jam(LocalTime.of(18, 0))
-                        .build();
-                jadwalRepository.save(jadwal3);
+        log.info("Creating jadwal for bioskop: {} and films: {}, {}",
+                bioskop1.getNama(), film1.getJudul(), film2.getJudul());
 
-                Jadwal jadwal4 = Jadwal.builder()
-                        .film(film1)
-                        .bioskop(bioskop1)
-                        .tanggal(LocalDate.now().plusDays(2))
-                        .jam(LocalTime.of(12, 0))
-                        .build();
-                jadwalRepository.save(jadwal4);
+        // Create jadwal dengan kondisi pengecekan yang spesifik
+        createJadwalIfNotExists(film1, bioskop1, LocalDate.now().plusDays(1), LocalTime.of(10, 0), "Jadwal 1");
+        createJadwalIfNotExists(film1, bioskop1, LocalDate.now().plusDays(1), LocalTime.of(14, 0), "Jadwal 2");
+        createJadwalIfNotExists(film2, bioskop1, LocalDate.now().plusDays(1), LocalTime.of(18, 0), "Jadwal 3");
+        createJadwalIfNotExists(film1, bioskop1, LocalDate.now().plusDays(2), LocalTime.of(12, 0), "Jadwal 4");
+    }
 
-                log.info("Created 4 jadwal");
+    private void createJadwalIfNotExists(Film film, Bioskop bioskop, LocalDate tanggal, LocalTime jam, String jadwalName) {
+        // Cek dengan kondisi yang sangat spesifik
+        if (jadwalRepository.findByFilmIdAndBioskopIdAndTanggalAndJam(film.getId(), bioskop.getId(), tanggal, jam).isEmpty()) {
+            Jadwal jadwal = Jadwal.builder()
+                    .film(film)
+                    .bioskop(bioskop)
+                    .tanggal(tanggal)
+                    .jam(jam)
+                    .build();
+
+            try {
+                jadwalRepository.save(jadwal);
+                log.info("Created {}: {} - {} pada {} jam {}", jadwalName, film.getJudul(), bioskop.getNama(), tanggal, jam);
+            } catch (Exception e) {
+                log.error("Error creating {}: {}", jadwalName, e.getMessage());
             }
+        } else {
+            log.info("{} already exists, skipping creation", jadwalName);
         }
     }
 
     private void createKursi() {
-        if (kursiRepository.count() == 0) {
-            List<Bioskop> bioskopList = bioskopRepository.findAll();
+        List<Bioskop> bioskopList = bioskopRepository.findAll();
 
-            if (!bioskopList.isEmpty()) {
-                Bioskop bioskop = bioskopList.get(0);
+        log.info("Found {} bioskop for kursi creation", bioskopList.size());
 
-                // Create kursi satu per satu untuk menghindari error
-                Kursi kursi1 = Kursi.builder().bioskop(bioskop).nomor("A1").tipe(Kursi.TipeKursi.REGULER).build();
-                kursiRepository.save(kursi1);
+        if (bioskopList.isEmpty()) {
+            log.warn("Cannot create kursi: No bioskop found");
+            return;
+        }
 
-                Kursi kursi2 = Kursi.builder().bioskop(bioskop).nomor("A2").tipe(Kursi.TipeKursi.REGULER).build();
-                kursiRepository.save(kursi2);
+        Bioskop bioskop = bioskopList.get(0);
+        log.info("Creating kursi for bioskop: {}", bioskop.getNama());
 
-                Kursi kursi3 = Kursi.builder().bioskop(bioskop).nomor("A3").tipe(Kursi.TipeKursi.REGULER).build();
-                kursiRepository.save(kursi3);
+        // Create kursi dengan kondisi pengecekan yang spesifik
+        createKursiIfNotExists(bioskop, "A1", Kursi.TipeKursi.REGULER, "Kursi A1");
+        createKursiIfNotExists(bioskop, "A2", Kursi.TipeKursi.REGULER, "Kursi A2");
+        createKursiIfNotExists(bioskop, "A3", Kursi.TipeKursi.REGULER, "Kursi A3");
+        createKursiIfNotExists(bioskop, "B1", Kursi.TipeKursi.REGULER, "Kursi B1");
+        createKursiIfNotExists(bioskop, "B2", Kursi.TipeKursi.REGULER, "Kursi B2");
+        createKursiIfNotExists(bioskop, "C1", Kursi.TipeKursi.VIP, "Kursi C1 VIP");
+        createKursiIfNotExists(bioskop, "C2", Kursi.TipeKursi.VIP, "Kursi C2 VIP");
+    }
 
-                Kursi kursi4 = Kursi.builder().bioskop(bioskop).nomor("B1").tipe(Kursi.TipeKursi.REGULER).build();
-                kursiRepository.save(kursi4);
+    private void createKursiIfNotExists(Bioskop bioskop, String nomor, Kursi.TipeKursi tipe, String kursiName) {
+        // Cek dengan kondisi yang sangat spesifik
+        if (kursiRepository.findByBioskopIdAndNomor(bioskop.getId(), nomor).isEmpty()) {
+            Kursi kursi = Kursi.builder()
+                    .bioskop(bioskop)
+                    .nomor(nomor)
+                    .tipe(tipe)
+                    .build();
 
-                Kursi kursi5 = Kursi.builder().bioskop(bioskop).nomor("B2").tipe(Kursi.TipeKursi.REGULER).build();
-                kursiRepository.save(kursi5);
-
-                Kursi kursi6 = Kursi.builder().bioskop(bioskop).nomor("C1").tipe(Kursi.TipeKursi.VIP).build();
-                kursiRepository.save(kursi6);
-
-                Kursi kursi7 = Kursi.builder().bioskop(bioskop).nomor("C2").tipe(Kursi.TipeKursi.VIP).build();
-                kursiRepository.save(kursi7);
-
-                log.info("Created 7 kursi");
+            try {
+                kursiRepository.save(kursi);
+                log.info("Created {}: {} - {} ({})", kursiName, bioskop.getNama(), nomor, tipe);
+            } catch (Exception e) {
+                log.error("Error creating {}: {}", kursiName, e.getMessage());
             }
+        } else {
+            log.info("{} already exists, skipping creation", kursiName);
         }
     }
 }

@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,4 +17,8 @@ public interface FilmRepository extends JpaRepository<Film, Long>, JpaSpecificat
     Film findByJudul(String judul);
     Page<Film> findByJudulContainingIgnoreCase(String judul, Pageable pageable);
     Page<Film> findByStatus(Film.StatusFilm status, Pageable pageable);
+
+    // Cari film berdasarkan judul dan genre (exact match)
+    @Query("SELECT f FROM Film f WHERE f.judul = :judul AND f.genre = :genre")
+    Film findByJudulAndGenre(@Param("judul") String judul, @Param("genre") String genre);
 }
